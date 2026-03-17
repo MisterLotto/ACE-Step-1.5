@@ -18,8 +18,9 @@ def handle_create_sample(
     lm_top_k: int,
     lm_top_p: float,
     constrained_decoding_debug: bool = False,
+    current_mode: str = "Simple",
 ):
-    """Handle Simple-mode sample creation.
+    """Handle Simple-mode and Sample-mode sample creation.
 
     Args:
         llm_handler: LLM handler instance.
@@ -30,6 +31,7 @@ def handle_create_sample(
         lm_top_k: LLM top-k value.
         lm_top_p: LLM top-p value.
         constrained_decoding_debug: Whether constrained-decoding debug logs are enabled.
+        current_mode: Active Gradio generation mode (e.g. "Simple" or "Sample").
 
     Returns:
         Tuple of 15 UI updates for wired Gradio outputs.
@@ -90,6 +92,11 @@ def handle_create_sample(
     gr.Info(t("messages.sample_created"))
     clamped_duration = clamp_duration_to_gpu_limit(result.duration, llm_handler)
     audio_duration_value = clamped_duration if clamped_duration and clamped_duration > 0 else -1
+    # In "Sample" mode, stay in "Sample" mode after creating the sample so that
+    # task_type remains "text2sample" when the user clicks the (now-enabled)
+    # Generate button. In "Simple" mode, switch to "Custom" (original behavior)
+    # to expose the editable caption/lyrics fields.
+    next_mode = current_mode if current_mode == "Sample" else "Custom"
     return (
         result.caption,
         result.lyrics,
@@ -105,5 +112,5 @@ def handle_create_sample(
         True,
         True,
         result.status_message,
-        gr.update(value="Custom"),
+        gr.update(value=next_mode),
     )

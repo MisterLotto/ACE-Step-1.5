@@ -650,13 +650,18 @@ def create_app() -> FastAPI:
 
         # When lyrics or sample_mode is explicitly provided, the message text role
         # is already known — skip auto-detection results.
-        if request.lyrics or request.sample_mode:
+        if request.lyrics or request.sample_mode or request.task_type == "text2sample":
             raw_text = prompt or sample_query or ""
             if request.lyrics:
                 # lyrics provided → message text is the prompt
                 prompt = raw_text
                 lyrics_from_msg = ""
                 sample_query = ""
+            elif request.task_type == "text2sample":
+                # text2sample → message text is always the sample_query
+                prompt = ""
+                lyrics_from_msg = ""
+                sample_query = raw_text
             else:
                 # sample_mode → message text is the sample_query
                 prompt = ""

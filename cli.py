@@ -658,12 +658,13 @@ def run_wizard(args, configure_only: bool = False, default_config_path: Optional
     try:
         # Task selection
         print("\n--- Task Type ---")
-        print("1. text2music - generate music from text/lyrics.")
-        print("2. cover     - transform existing audio into a new style.")
-        print("3. repaint   - regenerate a specific time segment of audio.")
-        print("4. lego      - generate a specific instrument track in context.")
-        print("5. extract   - isolate a specific instrument track from a mix.")
-        print("6. complete  - complete/extend partial tracks with new instruments.")
+        print("1. text2music  - generate music from text/lyrics.")
+        print("2. cover       - transform existing audio into a new style.")
+        print("3. repaint     - regenerate a specific time segment of audio.")
+        print("4. lego        - generate a specific instrument track in context.")
+        print("5. extract     - isolate a specific instrument track from a mix.")
+        print("6. complete    - complete/extend partial tracks with new instruments.")
+        print("7. text2sample - generate a short music sample from a text description.")
         task_map = {
             "1": "text2music",
             "2": "cover",
@@ -671,10 +672,11 @@ def run_wizard(args, configure_only: bool = False, default_config_path: Optional
             "4": "lego",
             "5": "extract",
             "6": "complete",
+            "7": "text2sample",
         }
         current_task = args.task_type or "text2music"
         task_default = next((k for k, v in task_map.items() if v == current_task), "1")
-        task_choice = input(f"Choose a task (1-6) [default: {task_default}]: ").strip()
+        task_choice = input(f"Choose a task (1-7) [default: {task_default}]: ").strip()
         if not task_choice:
             task_choice = task_default
         args.task_type = task_map.get(task_choice, "text2music")
@@ -770,6 +772,15 @@ def run_wizard(args, configure_only: bool = False, default_config_path: Optional
                 "Enter a music description (e.g., 'upbeat electronic dance music')",
                 args.caption,
                 required=True,
+            )
+        elif args.task_type == "text2sample":
+            # text2sample always uses LLM-driven sample generation.
+            args.sample_mode = True
+            args.sample_query = _prompt_with_default(
+                "Describe the sample you want (e.g., 'a punchy kick drum loop at 140 BPM')"
+                " — leave blank for a random AI-generated sample",
+                args.sample_query,
+                required=False,
             )
         elif args.task_type == "text2music":
             args.sample_mode = _prompt_bool("Use Simple Mode (auto-generate caption/lyrics via LM)", args.sample_mode)
@@ -1220,9 +1231,15 @@ def main():
             parser.error("--use_cot_lyrics requires --caption for lyric generation.")
         if args.sample_mode or args.sample_query:
             args.sample_mode = True
+    elif args.task_type == "text2sample":
+        # text2sample always uses LLM-driven generation; treat sample_mode as always on.
+        args.sample_mode = True
+        if args.use_cot_lyrics:
+            print("INFO: text2sample uses LLM sample generation. Disabling --use_cot_lyrics.")
+            args.use_cot_lyrics = False
     else:
         if args.sample_mode or args.sample_query:
-            parser.error("--sample_mode/sample_query are only supported for task_type 'text2music'.")
+            parser.error("--sample_mode/sample_query are only supported for task_type 'text2music' or 'text2sample'.")
 
     if args.sample_mode and args.use_cot_lyrics:
         print("INFO: sample_mode enabled. Disabling --use_cot_lyrics.")
@@ -1231,7 +1248,7 @@ def main():
     # Auto-select instruction based on task_type if user didn't provide a custom instruction.
     # Align with api_server behavior and TASK_INSTRUCTIONS defaults.
     if args.instruction == DEFAULT_DIT_INSTRUCTION and args.task_type in TASK_INSTRUCTIONS:
-        if args.task_type in {"text2music", "cover", "repaint"}:
+        if args.task_type in {"text2music", "text2sample", "cover", "repaint"}:
             args.instruction = TASK_INSTRUCTIONS[args.task_type]
 
     # Base-model-only task enforcement

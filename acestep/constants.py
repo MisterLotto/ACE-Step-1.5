@@ -92,15 +92,16 @@ TASK_TYPES_BASE = ["text2music", "repaint", "cover", "extract", "lego", "complet
 # ==============================================================================
 
 # Default modes for turbo and SFT models (restricted set)
-GENERATION_MODES_TURBO = ["Simple", "Custom", "Remix", "Repaint"]
+GENERATION_MODES_TURBO = ["Simple", "Custom", "Sample", "Remix", "Repaint"]
 
 # Extended modes for pure base models only — adds Extract/Lego/Complete
-GENERATION_MODES_BASE = ["Simple", "Custom", "Remix", "Repaint", "Extract", "Lego", "Complete"]
+GENERATION_MODES_BASE = ["Simple", "Custom", "Sample", "Remix", "Repaint", "Extract", "Lego", "Complete"]
 
 # Mapping from generation mode to task_type value
 MODE_TO_TASK_TYPE = {
     "Simple": "text2music",
     "Custom": "text2music",
+    "Sample": "text2sample",
     "Remix": "cover",
     "Repaint": "repaint",
     "Extract": "extract",
@@ -125,6 +126,7 @@ DEFAULT_LM_REWRITE_INSTRUCTION = "Format the user's input into a more detailed a
 # These should be formatted using .format() or f-strings when used
 TASK_INSTRUCTIONS = {
     "text2music": "Fill the audio semantic mask based on the given conditions:",
+    "text2sample": "Generate a music sample based on the given conditions:",
     "repaint": "Repaint the mask area based on the given conditions:",
     "cover": "Generate audio semantic tokens based on the given conditions:",
     "extract": "Extract the {TRACK_NAME} track from the audio:",

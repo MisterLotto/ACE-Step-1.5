@@ -72,6 +72,16 @@ def prepare_llm_generation_inputs(
     use_cot_language = bool(req.use_cot_language)
     full_analysis_only = bool(req.full_analysis_only)
 
+    # text2sample implicitly enables sample_mode: the LLM generates all metadata
+    # from the user's prompt so the caller does not need to set sample_mode manually.
+    _did_promote_prompt_as_query = False
+    if getattr(req, "task_type", "text2music") == "text2sample":
+        sample_mode = True
+        if not has_sample_query and req.prompt and req.prompt.strip():
+            # Promote the text prompt to sample_query so the LLM has a description.
+            has_sample_query = True
+            _did_promote_prompt_as_query = True
+
     if req.task_type == "cover" and selected_handler_device == "mps":
         if getattr(app_state, "_llm_initialized", False) and getattr(
             llm_handler, "llm_initialized", False
@@ -116,7 +126,10 @@ def prepare_llm_generation_inputs(
     original_lyrics = req.lyrics or ""
 
     if sample_mode or has_sample_query:
-        sample_query = req.sample_query if has_sample_query else "NO USER INPUT"
+        if _did_promote_prompt_as_query:
+            sample_query = req.prompt
+        else:
+            sample_query = req.sample_query if has_sample_query else "NO USER INPUT"
         parsed_language, parsed_instrumental = parse_description_hints(sample_query)
 
         if req.vocal_language and req.vocal_language not in ("en", "unknown", ""):

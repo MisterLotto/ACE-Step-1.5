@@ -25,6 +25,7 @@ OUTPUT_DIR.mkdir(exist_ok=True)
 # UI Configuration
 GENERATION_MODES = {
     "text2music": "🎵 Text to Music",
+    "text2sample": "🎼 Text to Sample",
     "cover": "🎤 Create Cover",
     "repaint": "🎨 Repaint Section",
     "complete": "🎼 Complete Section",

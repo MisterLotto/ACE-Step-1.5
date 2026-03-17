@@ -124,10 +124,10 @@ def register_generation_mode_handlers(
         ],
     )
 
-    # ========== Create Sample Button (Simple Mode) ==========
+    # ========== Create Sample Button (Simple and Sample modes) ==========
     generation_section["create_sample_btn"].click(
-        fn=lambda query, instrumental, vocal_lang, temp, top_k, top_p, debug: gen_h.handle_create_sample(
-            llm_handler, query, instrumental, vocal_lang, temp, top_k, top_p, debug
+        fn=lambda query, instrumental, vocal_lang, temp, top_k, top_p, debug, mode: gen_h.handle_create_sample(
+            llm_handler, query, instrumental, vocal_lang, temp, top_k, top_p, debug, current_mode=mode
         ),
         inputs=[
             generation_section["simple_query_input"],
@@ -137,6 +137,7 @@ def register_generation_mode_handlers(
             generation_section["lm_top_k"],
             generation_section["lm_top_p"],
             generation_section["constrained_decoding_debug"],
+            generation_section["generation_mode"],
         ],
         outputs=[
             generation_section["captions"],

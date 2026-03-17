@@ -18,6 +18,7 @@ def compute_mode_ui_updates(mode: str, llm_handler=None, previous_mode: str = "C
     task_type = MODE_TO_TASK_TYPE.get(mode, "text2music")
 
     is_simple = (mode == "Simple")
+    is_sample = (mode == "Sample")
     is_custom = (mode == "Custom")
     is_cover = (mode == "Remix")
     is_repaint = (mode == "Repaint")
@@ -25,13 +26,17 @@ def compute_mode_ui_updates(mode: str, llm_handler=None, previous_mode: str = "C
     is_lego = (mode == "Lego")
     is_complete = (mode == "Complete")
     leaving_extract_or_lego = previous_mode in ("Extract", "Lego")
-    not_simple = not is_simple
+    not_simple = not is_simple and not is_sample
 
     # --- Visibility rules ---
-    show_simple = is_simple
+    show_simple = is_simple or is_sample
     show_custom_group = not_simple and not is_extract
-    show_generate_row = not_simple
-    generate_interactive = not_simple
+    # "Sample" mode shows the generate-button row so the user can click Generate
+    # after the Create-Sample step populates the fields.  The button itself is
+    # initially disabled (generate_interactive=False) and becomes interactive
+    # only after handle_create_sample succeeds and returns interactive=True.
+    show_generate_row = not is_simple
+    generate_interactive = not is_simple and not is_sample
     show_src_audio = is_cover or is_repaint or is_extract or is_lego or is_complete
     show_optional = not_simple and not is_extract and not is_lego
     show_repainting = is_repaint or is_lego
@@ -40,7 +45,7 @@ def compute_mode_ui_updates(mode: str, llm_handler=None, previous_mode: str = "C
     show_complete_classes = is_complete
 
     # Audio cover strength
-    show_strength = not is_simple and not is_repaint and not is_extract and not is_lego
+    show_strength = not is_simple and not is_sample and not is_repaint and not is_extract and not is_lego
     if is_cover:
         strength_label = t("generation.remix_strength_label")
         strength_info = t("generation.remix_strength_info")
@@ -66,6 +71,7 @@ def compute_mode_ui_updates(mode: str, llm_handler=None, previous_mode: str = "C
 
     mode_descriptions = {
         "Simple": t("generation.mode_info_simple"),
+        "Sample": t("generation.mode_info_sample"),
         "Custom": t("generation.mode_info_custom"),
         "Remix": t("generation.mode_info_remix"),
         "Repaint": t("generation.mode_info_repaint"),
@@ -74,7 +80,7 @@ def compute_mode_ui_updates(mode: str, llm_handler=None, previous_mode: str = "C
         "Complete": t("generation.mode_info_complete"),
     }
     mode_help_text = mode_descriptions.get(mode, "")
-    show_results = not_simple
+    show_results = not is_simple and not is_sample
 
     # Generate button label
     if is_extract:
