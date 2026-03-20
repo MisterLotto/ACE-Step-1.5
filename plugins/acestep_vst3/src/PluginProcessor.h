@@ -3,6 +3,7 @@
 #include <JuceHeader.h>
 
 #include "PluginConfig.h"
+#include "PluginPreview.h"
 #include "PluginState.h"
 
 namespace acestep::vst3
@@ -38,9 +39,19 @@ public:
 
     const PluginState& getState() const noexcept;
     PluginState& getMutableState() noexcept;
+    [[nodiscard]] bool loadPreviewFile(const juce::File& file);
+    void clearPreviewFile();
+    void playPreview();
+    void stopPreview();
+    void revealPreviewFile() const;
+    [[nodiscard]] bool hasPreviewFile() const;
+    [[nodiscard]] bool isPreviewPlaying() const;
 
 private:
+    void syncPreviewFromState();
+
     PluginState state_;
+    PluginPreview preview_;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ACEStepVST3AudioProcessor)
 };

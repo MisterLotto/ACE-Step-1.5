@@ -17,9 +17,12 @@ std::unique_ptr<juce::XmlElement> createStateXml(const PluginState& state)
     xml->setAttribute("jobStatus", toString(state.jobStatus));
     xml->setAttribute("errorMessage", state.errorMessage);
     xml->setAttribute("selectedResultSlot", state.selectedResultSlot);
+    xml->setAttribute("previewFilePath", state.previewFilePath);
+    xml->setAttribute("previewDisplayName", state.previewDisplayName);
     for (size_t index = 0; index < state.resultSlots.size(); ++index)
     {
-        xml->setAttribute("resultSlot" + juce::String(static_cast<int>(index)), state.resultSlots[index]);
+        xml->setAttribute("resultSlot" + juce::String(static_cast<int>(index)),
+                          state.resultSlots[index]);
     }
     return xml;
 }
@@ -43,10 +46,14 @@ std::optional<PluginState> parseStateXml(const juce::XmlElement& xml)
     state.backendStatus = backendStatusFromString(xml.getStringAttribute("backendStatus"));
     state.jobStatus = jobStatusFromString(xml.getStringAttribute("jobStatus"));
     state.errorMessage = xml.getStringAttribute("errorMessage");
-    state.selectedResultSlot = juce::jlimit(0, kResultSlotCount - 1, xml.getIntAttribute("selectedResultSlot", 0));
+    state.selectedResultSlot =
+        juce::jlimit(0, kResultSlotCount - 1, xml.getIntAttribute("selectedResultSlot", 0));
+    state.previewFilePath = xml.getStringAttribute("previewFilePath");
+    state.previewDisplayName = xml.getStringAttribute("previewDisplayName");
     for (size_t index = 0; index < state.resultSlots.size(); ++index)
     {
-        state.resultSlots[index] = xml.getStringAttribute("resultSlot" + juce::String(static_cast<int>(index)));
+        state.resultSlots[index] =
+            xml.getStringAttribute("resultSlot" + juce::String(static_cast<int>(index)));
     }
 
     if (state.backendBaseUrl.isEmpty())

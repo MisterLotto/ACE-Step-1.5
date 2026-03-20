@@ -7,6 +7,7 @@ What it includes:
 - a VST3-only JUCE plugin target
 - state-driven MVP editor UI for prompt and job workflow
 - versioned plugin state persistence for the DAW project
+- local file preview playback and reveal-file handoff
 - no backend or generation calls yet
 
 The current UI persists:
@@ -17,6 +18,7 @@ The current UI persists:
 - model preset and quality mode
 - backend/job status selections
 - result slot labels and selected slot
+- preview file path and display name
 
 ## Build
 
@@ -46,5 +48,8 @@ The current shell is intentionally minimal. Manual validation should focus on:
 - plugin loads in Reaper on macOS
 - editor opens and closes cleanly
 - state survives save and reopen
+- preview file can be loaded, played, stopped, cleared, and revealed
+
+Drag-and-drop into the DAW timeline is intentionally deferred in this milestone.
 
 There is no backend integration in this milestone.

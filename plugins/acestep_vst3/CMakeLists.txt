@@ -35,8 +35,10 @@ target_sources(
     PRIVATE
         src/PluginEditor.cpp
         src/PluginEditorState.cpp
+        src/PluginEditorPreview.cpp
         src/PluginEnums.cpp
         src/PluginMockGeneration.cpp
+        src/PluginPreview.cpp
         src/PluginProcessor.cpp
         src/PluginState.cpp
 )

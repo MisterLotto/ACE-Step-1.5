@@ -26,6 +26,11 @@ private:
     void refreshResultSelector();
     void refreshStatusViews();
     void startMockGeneration();
+    void choosePreviewFile();
+    void playPreviewFile();
+    void stopPreviewFile();
+    void clearPreviewFile();
+    void revealPreviewFile();
 
     ACEStepVST3AudioProcessor& processor_;
     juce::Label titleLabel_;
@@ -44,6 +49,8 @@ private:
     juce::Label errorTitle_;
     juce::Label errorValue_;
     juce::Label resultsLabel_;
+    juce::Label previewTitle_;
+    juce::Label previewValue_;
     juce::TextEditor backendUrlEditor_;
     juce::TextEditor promptEditor_;
     juce::TextEditor lyricsEditor_;
@@ -54,6 +61,11 @@ private:
     juce::ComboBox backendStatusBox_;
     juce::ComboBox resultSlotBox_;
     juce::TextButton generateButton_ {"Generate"};
+    juce::TextButton choosePreviewButton_ {"Load Preview File"};
+    juce::TextButton playPreviewButton_ {"Play"};
+    juce::TextButton stopPreviewButton_ {"Stop"};
+    juce::TextButton clearPreviewButton_ {"Clear"};
+    juce::TextButton revealPreviewButton_ {"Reveal File"};
     bool isSyncing_ = false;
     int mockGenerationPhase_ = -1;
 

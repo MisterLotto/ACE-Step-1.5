@@ -14,10 +14,13 @@ ACEStepVST3AudioProcessor::~ACEStepVST3AudioProcessor() = default;
 
 void ACEStepVST3AudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
-    juce::ignoreUnused(sampleRate, samplesPerBlock);
+    preview_.prepareToPlay(sampleRate, samplesPerBlock);
 }
 
-void ACEStepVST3AudioProcessor::releaseResources() {}
+void ACEStepVST3AudioProcessor::releaseResources()
+{
+    preview_.releaseResources();
+}
 
 bool ACEStepVST3AudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const
 {
@@ -34,6 +37,7 @@ void ACEStepVST3AudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
 {
     juce::ignoreUnused(midiMessages);
     buffer.clear();
+    preview_.render(buffer);
 }
 
 juce::AudioProcessorEditor* ACEStepVST3AudioProcessor::createEditor()
@@ -118,6 +122,7 @@ void ACEStepVST3AudioProcessor::setStateInformation(const void* data, int sizeIn
         if (auto parsedState = parseStateXml(*xml))
         {
             state_ = *parsedState;
+            syncPreviewFromState();
         }
     }
 }
@@ -130,6 +135,80 @@ const PluginState& ACEStepVST3AudioProcessor::getState() const noexcept
 PluginState& ACEStepVST3AudioProcessor::getMutableState() noexcept
 {
     return state_;
+}
+
+bool ACEStepVST3AudioProcessor::loadPreviewFile(const juce::File& file)
+{
+    juce::String errorMessage;
+    if (!preview_.loadFile(file, errorMessage))
+    {
+        state_.errorMessage = errorMessage;
+        return false;
+    }
+
+    state_.previewFilePath = file.getFullPathName();
+    state_.previewDisplayName = file.getFileName();
+    state_.errorMessage = {};
+    return true;
+}
+
+void ACEStepVST3AudioProcessor::clearPreviewFile()
+{
+    preview_.clear();
+    state_.previewFilePath = {};
+    state_.previewDisplayName = {};
+    state_.errorMessage = {};
+}
+
+void ACEStepVST3AudioProcessor::playPreview()
+{
+    if (!hasPreviewFile())
+    {
+        state_.errorMessage = "Load a preview file before playing it.";
+        return;
+    }
+
+    state_.errorMessage = {};
+    preview_.play();
+}
+
+void ACEStepVST3AudioProcessor::stopPreview()
+{
+    preview_.stop();
+}
+
+void ACEStepVST3AudioProcessor::revealPreviewFile() const
+{
+    preview_.revealToUser();
+}
+
+bool ACEStepVST3AudioProcessor::hasPreviewFile() const
+{
+    return preview_.hasLoadedFile();
+}
+
+bool ACEStepVST3AudioProcessor::isPreviewPlaying() const
+{
+    return preview_.isPlaying();
+}
+
+void ACEStepVST3AudioProcessor::syncPreviewFromState()
+{
+    preview_.clear();
+    if (state_.previewFilePath.isEmpty())
+    {
+        return;
+    }
+
+    juce::String errorMessage;
+    const juce::File previewFile(state_.previewFilePath);
+    if (!preview_.loadFile(previewFile, errorMessage))
+    {
+        state_.errorMessage = errorMessage;
+        return;
+    }
+
+    state_.previewDisplayName = previewFile.getFileName();
 }
 }  // namespace acestep::vst3
 
