@@ -23,9 +23,12 @@ struct PluginState final
     QualityMode qualityMode = QualityMode::balanced;
     BackendStatus backendStatus = BackendStatus::ready;
     JobStatus jobStatus = JobStatus::idle;
+    juce::String currentTaskId;
+    juce::String progressText;
     juce::String errorMessage;
     int selectedResultSlot = 0;
     std::array<juce::String, static_cast<size_t>(kResultSlotCount)> resultSlots;
+    std::array<juce::String, static_cast<size_t>(kResultSlotCount)> resultFileUrls;
 };
 
 [[nodiscard]] std::unique_ptr<juce::XmlElement> createStateXml(const PluginState& state);

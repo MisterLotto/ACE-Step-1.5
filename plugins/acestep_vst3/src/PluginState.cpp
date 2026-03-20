@@ -15,11 +15,16 @@ std::unique_ptr<juce::XmlElement> createStateXml(const PluginState& state)
     xml->setAttribute("qualityMode", toString(state.qualityMode));
     xml->setAttribute("backendStatus", toString(state.backendStatus));
     xml->setAttribute("jobStatus", toString(state.jobStatus));
+    xml->setAttribute("currentTaskId", state.currentTaskId);
+    xml->setAttribute("progressText", state.progressText);
     xml->setAttribute("errorMessage", state.errorMessage);
     xml->setAttribute("selectedResultSlot", state.selectedResultSlot);
     for (size_t index = 0; index < state.resultSlots.size(); ++index)
     {
-        xml->setAttribute("resultSlot" + juce::String(static_cast<int>(index)), state.resultSlots[index]);
+        xml->setAttribute("resultSlot" + juce::String(static_cast<int>(index)),
+                          state.resultSlots[index]);
+        xml->setAttribute("resultFileUrl" + juce::String(static_cast<int>(index)),
+                          state.resultFileUrls[index]);
     }
     return xml;
 }
@@ -42,11 +47,17 @@ std::optional<PluginState> parseStateXml(const juce::XmlElement& xml)
     state.qualityMode = qualityModeFromString(xml.getStringAttribute("qualityMode"));
     state.backendStatus = backendStatusFromString(xml.getStringAttribute("backendStatus"));
     state.jobStatus = jobStatusFromString(xml.getStringAttribute("jobStatus"));
+    state.currentTaskId = xml.getStringAttribute("currentTaskId");
+    state.progressText = xml.getStringAttribute("progressText");
     state.errorMessage = xml.getStringAttribute("errorMessage");
-    state.selectedResultSlot = juce::jlimit(0, kResultSlotCount - 1, xml.getIntAttribute("selectedResultSlot", 0));
+    state.selectedResultSlot =
+        juce::jlimit(0, kResultSlotCount - 1, xml.getIntAttribute("selectedResultSlot", 0));
     for (size_t index = 0; index < state.resultSlots.size(); ++index)
     {
-        state.resultSlots[index] = xml.getStringAttribute("resultSlot" + juce::String(static_cast<int>(index)));
+        state.resultSlots[index] =
+            xml.getStringAttribute("resultSlot" + juce::String(static_cast<int>(index)));
+        state.resultFileUrls[index] =
+            xml.getStringAttribute("resultFileUrl" + juce::String(static_cast<int>(index)));
     }
 
     if (state.backendBaseUrl.isEmpty())

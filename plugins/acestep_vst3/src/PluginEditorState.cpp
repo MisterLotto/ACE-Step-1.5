@@ -69,24 +69,24 @@ void ACEStepVST3AudioProcessorEditor::configureSelectors()
     backendStatusBox_.addItem(toString(BackendStatus::ready), 1);
     backendStatusBox_.addItem(toString(BackendStatus::offline), 2);
     backendStatusBox_.addItem(toString(BackendStatus::degraded), 3);
+    backendStatusBox_.setEnabled(false);
 
     durationBox_.onChange = [this] { persistTextFields(); };
     modelBox_.onChange = [this] { persistTextFields(); };
     qualityBox_.onChange = [this] { persistTextFields(); };
-    backendStatusBox_.onChange = [this] {
-        persistTextFields();
-        refreshStatusViews();
-    };
     resultSlotBox_.onChange = [this] {
         if (isSyncing_)
         {
             return;
         }
-        processor_.getMutableState().selectedResultSlot =
-            juce::jmax(0, resultSlotBox_.getSelectedItemIndex());
+        processor_.selectResultSlot(juce::jmax(0, resultSlotBox_.getSelectedItemIndex()));
         refreshStatusViews();
     };
-    generateButton_.onClick = [this] { startMockGeneration(); };
+    generateButton_.onClick = [this] {
+        persistTextFields();
+        processor_.requestGeneration();
+        refreshStatusViews();
+    };
 
     for (auto* component : {static_cast<juce::Component*>(&durationBox_),
                             static_cast<juce::Component*>(&modelBox_),
@@ -144,8 +144,6 @@ void ACEStepVST3AudioProcessorEditor::persistTextFields()
 
     state.modelPreset = static_cast<ModelPreset>(juce::jmax(0, modelBox_.getSelectedItemIndex()));
     state.qualityMode = static_cast<QualityMode>(juce::jmax(0, qualityBox_.getSelectedItemIndex()));
-    state.backendStatus =
-        static_cast<BackendStatus>(juce::jmax(0, backendStatusBox_.getSelectedItemIndex()));
     refreshStatusViews();
 }
 
@@ -170,13 +168,20 @@ void ACEStepVST3AudioProcessorEditor::refreshResultSelector()
 void ACEStepVST3AudioProcessorEditor::refreshStatusViews()
 {
     const auto& state = processor_.getState();
+    backendStatusBox_.setSelectedId(static_cast<int>(state.backendStatus) + 1,
+                                    juce::dontSendNotification);
     backendStatusValue_.setText(
         "Target: " + state.backendBaseUrl + "\nStatus: " + toString(state.backendStatus),
         juce::dontSendNotification);
     jobStatusValue_.setText("State: " + toString(state.jobStatus) + "\nSelected slot: "
-                                + juce::String(state.selectedResultSlot + 1),
+                                + juce::String(state.selectedResultSlot + 1) + "\nMessage: "
+                                + (state.progressText.isEmpty() ? "Idle" : state.progressText),
                             juce::dontSendNotification);
     errorValue_.setText(state.errorMessage.isEmpty() ? "No active error." : state.errorMessage,
                         juce::dontSendNotification);
+    const auto isBusy = state.jobStatus == JobStatus::submitting
+                        || state.jobStatus == JobStatus::queuedOrRunning;
+    generateButton_.setEnabled(!isBusy);
+    generateButton_.setButtonText(isBusy ? "Rendering..." : "Generate");
 }
 }  // namespace acestep::vst3

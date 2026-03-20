@@ -25,7 +25,6 @@ private:
     void persistTextFields();
     void refreshResultSelector();
     void refreshStatusViews();
-    void startMockGeneration();
 
     ACEStepVST3AudioProcessor& processor_;
     juce::Label titleLabel_;
@@ -55,7 +54,6 @@ private:
     juce::ComboBox resultSlotBox_;
     juce::TextButton generateButton_ {"Generate"};
     bool isSyncing_ = false;
-    int mockGenerationPhase_ = -1;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ACEStepVST3AudioProcessorEditor)
 };

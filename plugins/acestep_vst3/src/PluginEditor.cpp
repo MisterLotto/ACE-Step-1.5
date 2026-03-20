@@ -1,6 +1,5 @@
 #include "PluginEditor.h"
 
-#include "PluginMockGeneration.h"
 #include "PluginProcessor.h"
 
 namespace acestep::vst3
@@ -22,6 +21,7 @@ ACEStepVST3AudioProcessorEditor::ACEStepVST3AudioProcessorEditor(
     syncFromProcessor();
     refreshResultSelector();
     refreshStatusViews();
+    startTimerHz(4);
 }
 
 ACEStepVST3AudioProcessorEditor::~ACEStepVST3AudioProcessorEditor() = default;
@@ -90,30 +90,8 @@ void ACEStepVST3AudioProcessorEditor::resized()
 
 void ACEStepVST3AudioProcessorEditor::timerCallback()
 {
-    auto& state = processor_.getMutableState();
-    ++mockGenerationPhase_;
-    advanceMockGeneration(state, mockGenerationPhase_);
+    processor_.pumpBackendWorkflow();
     refreshResultSelector();
     refreshStatusViews();
-    if (state.jobStatus == JobStatus::succeeded)
-    {
-        stopTimer();
-        mockGenerationPhase_ = -1;
-    }
-}
-
-void ACEStepVST3AudioProcessorEditor::startMockGeneration()
-{
-    stopTimer();
-    mockGenerationPhase_ = -1;
-    persistTextFields();
-    auto& state = processor_.getMutableState();
-    if (!beginMockGeneration(state))
-    {
-        refreshStatusViews();
-        return;
-    }
-    refreshStatusViews();
-    startTimer(650);
 }
 }  // namespace acestep::vst3
