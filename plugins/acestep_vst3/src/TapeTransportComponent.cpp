@@ -38,6 +38,9 @@ TapeTransportComponent::TapeTransportComponent()
         addAndMakeVisible(*label);
     }
     addAndMakeVisible(generateButton_);
+    addAndMakeVisible(auditionButton_);
+    addAndMakeVisible(stopButton_);
+    addAndMakeVisible(revealButton_);
 }
 
 void TapeTransportComponent::paint(juce::Graphics& g)
@@ -79,18 +82,35 @@ void TapeTransportComponent::resized()
     area.removeFromTop(8);
     errorLabel_.setBounds(area.removeFromTop(44));
     area.removeFromTop(12);
-    generateButton_.setBounds(area.removeFromTop(44).removeFromLeft(240));
+
+    auto primaryRow = area.removeFromTop(44);
+    generateButton_.setBounds(primaryRow.removeFromLeft(240));
+
+    area.removeFromTop(10);
+    auto previewRow = area.removeFromTop(34);
+    auditionButton_.setBounds(previewRow.removeFromLeft(132));
+    previewRow.removeFromLeft(8);
+    stopButton_.setBounds(previewRow.removeFromLeft(92));
+    previewRow.removeFromLeft(8);
+    revealButton_.setBounds(previewRow.removeFromLeft(108));
 }
 
 juce::TextButton& TapeTransportComponent::generateButton() noexcept { return generateButton_; }
+juce::TextButton& TapeTransportComponent::auditionButton() noexcept { return auditionButton_; }
+juce::TextButton& TapeTransportComponent::stopButton() noexcept { return stopButton_; }
+juce::TextButton& TapeTransportComponent::revealButton() noexcept { return revealButton_; }
 
 void TapeTransportComponent::setTransportState(BackendStatus backendStatus,
                                                JobStatus jobStatus,
                                                const juce::String& message,
-                                               const juce::String& errorText)
+                                               const juce::String& errorText,
+                                               bool previewLoaded,
+                                               bool previewPlaying)
 {
     backendStatus_ = backendStatus;
     jobStatus_ = jobStatus;
+    previewLoaded_ = previewLoaded;
+    previewPlaying_ = previewPlaying;
     backendLabel_.setText("Backend // " + toString(backendStatus), juce::dontSendNotification);
     stateLabel_.setText("Transport // " + toString(jobStatus), juce::dontSendNotification);
     messageLabel_.setText(message.isEmpty() ? "Transport armed." : message, juce::dontSendNotification);
@@ -98,6 +118,10 @@ void TapeTransportComponent::setTransportState(BackendStatus backendStatus,
     const auto busy = jobStatus == JobStatus::submitting || jobStatus == JobStatus::queuedOrRunning;
     generateButton_.setEnabled(!busy);
     generateButton_.setButtonText(busy ? "Rendering..." : "Render");
+    auditionButton_.setEnabled(previewLoaded_ && !busy);
+    auditionButton_.setButtonText(previewPlaying_ ? "Playing..." : "Audition");
+    stopButton_.setEnabled(previewLoaded_ && previewPlaying_);
+    revealButton_.setEnabled(previewLoaded_);
     repaint();
 }
 }  // namespace acestep::vst3

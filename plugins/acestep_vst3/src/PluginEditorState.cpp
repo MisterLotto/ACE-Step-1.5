@@ -188,6 +188,9 @@ void ACEStepVST3AudioProcessorEditor::configureSelectors()
         processor_.requestGeneration();
         refreshStatusViews();
     };
+    transport_.auditionButton().onClick = [this] { playPreviewFile(); };
+    transport_.stopButton().onClick = [this] { stopPreviewFile(); };
+    transport_.revealButton().onClick = [this] { revealPreviewFile(); };
     previewDeck_.loadButton().onClick = [this] { choosePreviewFile(); };
     previewDeck_.playButton().onClick = [this] { playPreviewFile(); };
     previewDeck_.stopButton().onClick = [this] { stopPreviewFile(); };
@@ -375,7 +378,9 @@ void ACEStepVST3AudioProcessorEditor::refreshStatusViews()
     transport_.setTransportState(state.backendStatus,
                                  state.jobStatus,
                                  transportMessage,
-                                 state.errorMessage);
+                                 state.errorMessage,
+                                 processor_.hasPreviewFile(),
+                                 processor_.isPreviewPlaying());
 
     auto takeTitle = "Take " + juce::String(state.selectedResultSlot + 1);
     auto takeDetail = state.resultSlots[static_cast<size_t>(state.selectedResultSlot)];
