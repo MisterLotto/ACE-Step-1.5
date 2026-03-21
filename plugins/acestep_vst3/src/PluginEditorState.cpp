@@ -182,6 +182,7 @@ void ACEStepVST3AudioProcessorEditor::configureSelectors()
     resultDeck_.cueCompareAButton().onClick = [this] { cueComparePrimary(); };
     resultDeck_.cueCompareBButton().onClick = [this] { cueCompareSecondary(); };
     resultDeck_.toggleCompareButton().onClick = [this] { toggleComparePreview(); };
+    resultDeck_.dragToDawButton().onClick = [this] { dragSelectedResultToDaw(); };
 
     transport_.generateButton().onClick = [this] {
         persistTextFields();
@@ -394,6 +395,7 @@ void ACEStepVST3AudioProcessorEditor::refreshStatusViews()
     {
         takeDetail += "\n" + formatFileSummary("LOCAL", localPath);
         takeDetail += "\nPATH // " + localPath;
+        takeDetail += "\nHANDOFF // Drag to DAW";
     }
     else if (!remoteUrl.isEmpty())
     {
@@ -422,6 +424,7 @@ void ACEStepVST3AudioProcessorEditor::refreshStatusViews()
     resultDeck_.setCompareSummary(compareSummary);
     resultDeck_.toggleCompareButton().setButtonText(state.compareOnPrimary ? "Toggle to B"
                                                                            : "Toggle to A");
+    resultDeck_.dragToDawButton().setEnabled(!localPath.isEmpty());
 
     synthPanel_.loraStatusLabel().setText(state.loraStatusText.isEmpty() ? "No LoRA loaded."
                                                                          : state.loraStatusText,

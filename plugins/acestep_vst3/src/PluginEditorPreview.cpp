@@ -155,4 +155,31 @@ void ACEStepVST3AudioProcessorEditor::revealPreviewFile()
 {
     processor_.revealPreviewFile();
 }
+
+void ACEStepVST3AudioProcessorEditor::dragSelectedResultToDaw()
+{
+    const auto& state = processor_.getState();
+    const auto slotIndex = static_cast<size_t>(state.selectedResultSlot);
+    const auto localPath = state.resultLocalPaths[slotIndex].isNotEmpty()
+                               ? state.resultLocalPaths[slotIndex]
+                               : state.previewFilePath;
+
+    if (localPath.isEmpty() || !juce::File(localPath).existsAsFile())
+    {
+        processor_.getMutableState().errorMessage =
+            "Generate a take first, then drag the printed file into the DAW.";
+        refreshStatusViews();
+        return;
+    }
+
+    processor_.getMutableState().errorMessage = {};
+    juce::StringArray files;
+    files.add(localPath);
+    if (!juce::DragAndDropContainer::performExternalDragDropOfFiles(files, false, this))
+    {
+        processor_.getMutableState().errorMessage =
+            "Could not start drag-and-drop. Try Reveal and drag the file from Finder.";
+    }
+    refreshStatusViews();
+}
 }  // namespace acestep::vst3

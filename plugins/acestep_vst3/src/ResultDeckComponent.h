@@ -18,6 +18,7 @@ public:
     juce::TextButton& cueCompareAButton() noexcept;
     juce::TextButton& cueCompareBButton() noexcept;
     juce::TextButton& toggleCompareButton() noexcept;
+    juce::TextButton& dragToDawButton() noexcept;
     void setTakeSummary(const juce::String& title, const juce::String& detail);
     void setCompareSummary(const juce::String& summary);
 
@@ -32,6 +33,7 @@ private:
     juce::TextButton cueCompareAButton_ {"Cue A"};
     juce::TextButton cueCompareBButton_ {"Cue B"};
     juce::TextButton toggleCompareButton_ {"Toggle A/B"};
+    juce::TextButton dragToDawButton_ {"Drag to DAW"};
     juce::Label compareSummaryLabel_;
 };
 }  // namespace acestep::vst3

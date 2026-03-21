@@ -52,6 +52,7 @@ private:
     void cueComparePrimary();
     void cueCompareSecondary();
     void toggleComparePreview();
+    void dragSelectedResultToDaw();
 
     ACEStepVST3AudioProcessor& processor_;
     std::unique_ptr<V2LookAndFeel> lookAndFeel_;

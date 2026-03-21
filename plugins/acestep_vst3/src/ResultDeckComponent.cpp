@@ -26,6 +26,7 @@ ResultDeckComponent::ResultDeckComponent()
     addAndMakeVisible(cueCompareAButton_);
     addAndMakeVisible(cueCompareBButton_);
     addAndMakeVisible(toggleCompareButton_);
+    addAndMakeVisible(dragToDawButton_);
     addAndMakeVisible(compareSummaryLabel_);
 }
 
@@ -61,6 +62,8 @@ void ResultDeckComponent::resized()
     auto compareFooter = area.removeFromTop(28);
     toggleCompareButton_.setBounds(compareFooter.removeFromLeft(116));
     compareFooter.removeFromLeft(12);
+    dragToDawButton_.setBounds(compareFooter.removeFromRight(132));
+    compareFooter.removeFromRight(12);
     compareSummaryLabel_.setBounds(compareFooter);
 }
 
@@ -79,6 +82,7 @@ juce::TextButton& ResultDeckComponent::toggleCompareButton() noexcept
 {
     return toggleCompareButton_;
 }
+juce::TextButton& ResultDeckComponent::dragToDawButton() noexcept { return dragToDawButton_; }
 
 void ResultDeckComponent::setTakeSummary(const juce::String& title, const juce::String& detail)
 {
