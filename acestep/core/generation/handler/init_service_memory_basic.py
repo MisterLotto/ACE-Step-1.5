@@ -1,7 +1,34 @@
 """Memory and device-check helpers for initialization/offload flows."""
 
+import gc
+import platform
+import resource
+
 import torch
 from loguru import logger
+
+# Set mmap threshold once at import time so large allocs use mmap and are
+# returned to the OS immediately on free — critical for CPU-offload workflows.
+_MALLOPT_APPLIED = False
+
+
+def _apply_malloc_mmap_threshold() -> None:
+    """Set glibc M_MMAP_THRESHOLD to 64 KB so large freed blocks go back to OS."""
+    global _MALLOPT_APPLIED
+    if _MALLOPT_APPLIED or platform.system() != "Linux":
+        return
+    try:
+        import ctypes
+        libc = ctypes.CDLL("libc.so.6")
+        # M_MMAP_THRESHOLD = -3; 64 KB threshold forces mmap for large allocs
+        libc.mallopt(-3, 65536)
+        _MALLOPT_APPLIED = True
+        logger.debug("[memory] Set M_MMAP_THRESHOLD=65536 for immediate OS reclaim of large frees")
+    except Exception as exc:
+        logger.debug("[memory] mallopt not available: {}", exc)
+
+
+_apply_malloc_mmap_threshold()
 
 
 class InitServiceMemoryBasicMixin:
@@ -105,3 +132,42 @@ class InitServiceMemoryBasicMixin:
         if hasattr(self, "silence_latent") and self.silence_latent is not None:
             if not self._is_on_target_device(self.silence_latent, self.device):
                 self.silence_latent = self.silence_latent.to(self.device).to(self.dtype)
+
+    @staticmethod
+    def _get_rss_mb() -> float:
+        """Return current process RSS in megabytes.
+
+        Uses ``/proc/self/statm`` on Linux for the true current resident set size.
+        Falls back to ``getrusage`` (peak RSS) on other platforms.
+        """
+        if platform.system() == "Linux":
+            try:
+                with open("/proc/self/statm") as f:
+                    # statm field index 1 is RSS in pages
+                    rss_pages = int(f.read().split()[1])
+                return rss_pages * resource.getpagesize() / (1024 * 1024)
+            except Exception:
+                pass
+        usage = resource.getrusage(resource.RUSAGE_SELF)
+        if platform.system() == "Darwin":
+            return usage.ru_maxrss / (1024 * 1024)
+        return usage.ru_maxrss / 1024
+
+    def _release_system_memory(self):
+        """Aggressively reclaim system memory after device transfers.
+
+        Combines Python GC, accelerator cache flush, and OS-level heap
+        trimming to return freed pages to the operating system.  This is
+        critical for CPU-offload workflows where PyTorch ``.to()`` creates
+        new tensor storage on each transfer and the old storage may not be
+        returned to the OS by the default C allocator.
+        """
+        gc.collect()
+        self._empty_cache()
+        if platform.system() == "Linux":
+            try:
+                import ctypes
+                libc = ctypes.CDLL("libc.so.6")
+                libc.malloc_trim(0)
+            except Exception:
+                pass
