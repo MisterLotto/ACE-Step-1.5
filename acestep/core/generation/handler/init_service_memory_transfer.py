@@ -40,24 +40,21 @@ class InitServiceMemoryTransferMixin:
             if buf is not None and not self._is_on_target_device(buf, target_device):
                 module._buffers[buf_name] = buf.to(target_device)
 
-        # Traverse registered submodules first (covers standard PyTorch modules
+        # Traverse registered submodules (covers standard PyTorch modules
         # and PEFT-registered LoRA layers).
         for _, child in module._modules.items():
             if child is not None:
                 self._move_module_recursive(child, target_device, dtype, visited)
 
-        # Safety net: also scan non-private attributes for Module instances that
-        # are stored as plain object attributes rather than via add_module /
-        # __setattr__.  PEFT and LyCORIS may store adapter references this way.
-        for attr_name in dir(module):
+        # Safety net: scan instance __dict__ for Module instances stored as
+        # plain object attributes (not via add_module / __setattr__).
+        # PEFT and LyCORIS may store adapter references this way.
+        # Uses vars() instead of dir() to avoid inherited methods/properties.
+        for attr_name, attr in vars(module).items():
             if attr_name.startswith("_"):
                 continue
-            try:
-                attr = getattr(module, attr_name, None)
-                if isinstance(attr, torch.nn.Module) and id(attr) not in visited:
-                    self._move_module_recursive(attr, target_device, dtype, visited)
-            except (AttributeError, TypeError):
-                pass
+            if isinstance(attr, torch.nn.Module) and id(attr) not in visited:
+                self._move_module_recursive(attr, target_device, dtype, visited)
 
     def _move_quantized_param(self, param, target_device):
         """Move an AffineQuantizedTensor to target device using ``_apply_fn_to_data`` when available."""
@@ -82,22 +79,24 @@ class InitServiceMemoryTransferMixin:
         """
         target_device = torch.device(device) if isinstance(device, str) else device
 
+        fast_path_ok = True
         try:
             if dtype is not None:
                 model.to(device=target_device, dtype=dtype)
             else:
                 model.to(target_device)
         except NotImplementedError:
+            fast_path_ok = False
             logger.info(
                 "[_recursive_to_device] model.to() raised NotImplementedError "
                 "(AffineQuantizedTensor on older torch). Moving parameters individually."
             )
-            self._move_module_recursive(model, target_device, dtype)
 
         # Always run recursive sweep as a safety net.  This catches PEFT/LoRA
         # adapter weights and any other parameters that model.to() missed.
         # The sweep is cheap (no-ops for already-correct params) and critical
-        # for CPU-offload workflows with LoRA adapters.
+        # for CPU-offload workflows with LoRA adapters.  On the
+        # NotImplementedError path this is the only device-transfer mechanism.
         try:
             self._move_module_recursive(model, target_device, dtype)
         except NotImplementedError:

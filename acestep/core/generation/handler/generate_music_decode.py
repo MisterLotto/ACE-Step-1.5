@@ -65,8 +65,12 @@ class GenerateMusicDecodeMixin:
         logger.debug(f"[generate_music] time_costs: {time_costs}")
 
         if torch.isnan(pred_latents).any() or torch.isinf(pred_latents).any():
+            nan_count = torch.isnan(pred_latents).sum().item()
+            inf_count = torch.isinf(pred_latents).sum().item()
             hints = [
-                "Generation produced NaN or Inf latents.",
+                f"Generation produced NaN or Inf latents "
+                f"(shape={list(pred_latents.shape)}, dtype={pred_latents.dtype}, "
+                f"device={pred_latents.device}, nan={nan_count}, inf={inf_count}).",
                 "Common causes and fixes:",
                 "  1. LoRA/adapter trained on an older model version — retrain or update the adapter.",
                 "  2. Checkpoint/config mismatch — verify model checkpoints match this release.",

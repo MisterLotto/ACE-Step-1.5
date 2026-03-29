@@ -69,39 +69,37 @@ class GenerateMusicMixin:
         wrong_device = []
         wrong_dtype = []
         for name, param in decoder.named_parameters():
-            if param.device != torch.device(self.device):
+            if not self._is_on_target_device(param, self.device):
                 wrong_device.append(name)
             if param.is_floating_point() and param.dtype != self.dtype:
                 wrong_dtype.append(name)
 
-        if wrong_device:
-            logger.warning(
-                f"[generate_music] LoRA sanity check: {len(wrong_device)} decoder "
-                f"parameters on wrong device (expected {self.device}), fixing: "
-                f"{wrong_device[:5]}{'...' if len(wrong_device) > 5 else ''}"
-            )
-            decoder.to(self.device)
-
-        if wrong_dtype:
-            logger.warning(
-                f"[generate_music] LoRA sanity check: {len(wrong_dtype)} decoder "
-                f"parameters have wrong dtype (expected {self.dtype}), fixing: "
-                f"{wrong_dtype[:5]}{'...' if len(wrong_dtype) > 5 else ''}"
-            )
-            decoder.to(self.dtype)
+        if wrong_device or wrong_dtype:
+            if wrong_device:
+                logger.warning(
+                    f"[generate_music] LoRA sanity check: {len(wrong_device)} decoder "
+                    f"parameters on wrong device (expected {self.device}), fixing: "
+                    f"{wrong_device[:5]}{'...' if len(wrong_device) > 5 else ''}"
+                )
+            if wrong_dtype:
+                logger.warning(
+                    f"[generate_music] LoRA sanity check: {len(wrong_dtype)} decoder "
+                    f"parameters have wrong dtype (expected {self.dtype}), fixing: "
+                    f"{wrong_dtype[:5]}{'...' if len(wrong_dtype) > 5 else ''}"
+                )
+            decoder.to(device=self.device, dtype=self.dtype)
 
         # Final verification — use recursive move if simple .to() wasn't enough
         still_wrong = [
             name for name, p in decoder.named_parameters()
-            if p.device != torch.device(self.device)
+            if not self._is_on_target_device(p, self.device)
         ]
         if still_wrong:
             logger.warning(
                 f"[generate_music] {len(still_wrong)} params still on wrong device "
                 f"after decoder.to(), using recursive move"
             )
-            if hasattr(self, "_recursive_to_device"):
-                self._recursive_to_device(decoder, self.device, self.dtype)
+            self._recursive_to_device(decoder, self.device, self.dtype)
 
     def _vram_preflight_check(
         self,
