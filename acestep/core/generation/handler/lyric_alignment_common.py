@@ -8,6 +8,20 @@ import torch
 class LyricAlignmentCommonMixin:
     """Provide shared data preparation helpers for lyric alignment methods."""
 
+    def _sync_alignment_config(self) -> None:
+        """Load lyric alignment layers config from model config if available.
+
+        Called after ``self.config`` is set during model initialization.
+        The model's ``lyric_alignment_layers_config`` (stored as
+        ``{"layer_idx": [head_indices]}`` with string keys in JSON) takes
+        precedence over the handler's built-in 2B default.
+        """
+        raw = getattr(self.config, "lyric_alignment_layers_config", None) if self.config else None
+        if raw is None:
+            return
+        # HuggingFace config JSON serializes dict keys as strings — convert to int.
+        self.custom_layers_config = {int(k): v for k, v in raw.items()}
+
     def _resolve_custom_layers_config(
         self, custom_layers_config: Optional[Dict[int, List[int]]]
     ) -> Dict[int, List[int]]:

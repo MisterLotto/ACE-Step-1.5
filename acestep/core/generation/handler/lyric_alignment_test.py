@@ -60,6 +60,58 @@ class _Host(LyricTimestampMixin, LyricScoreMixin):
         return contextlib.nullcontext()
 
 
+class SyncAlignmentConfigTests(unittest.TestCase):
+    """Test _sync_alignment_config picks up model config values."""
+
+    def test_sync_from_model_config_with_string_keys(self):
+        """Model config with string keys (JSON-serialized) should be converted to int keys."""
+        decoder = _Decoder(cross_attns=None)
+        host = _Host(decoder=decoder)
+        # Simulate model config with string keys as HuggingFace JSON serializes them
+        host.config = types.SimpleNamespace(
+            lyric_alignment_layers_config={"3": [18, 27], "4": [22], "5": [5, 6, 7]}
+        )
+        host._sync_alignment_config()
+        self.assertEqual(host.custom_layers_config, {3: [18, 27], 4: [22], 5: [5, 6, 7]})
+
+    def test_sync_from_model_config_with_int_keys(self):
+        """Model config with int keys should work directly."""
+        decoder = _Decoder(cross_attns=None)
+        host = _Host(decoder=decoder)
+        host.config = types.SimpleNamespace(
+            lyric_alignment_layers_config={3: [18, 27], 7: [20, 21]}
+        )
+        host._sync_alignment_config()
+        self.assertEqual(host.custom_layers_config, {3: [18, 27], 7: [20, 21]})
+
+    def test_sync_preserves_default_when_config_missing(self):
+        """When model config has no lyric_alignment_layers_config, default is kept."""
+        decoder = _Decoder(cross_attns=None)
+        host = _Host(decoder=decoder)
+        host.config = types.SimpleNamespace()  # no lyric_alignment_layers_config attr
+        original = dict(host.custom_layers_config)
+        host._sync_alignment_config()
+        self.assertEqual(host.custom_layers_config, original)
+
+    def test_sync_preserves_default_when_config_is_none(self):
+        """When lyric_alignment_layers_config is explicitly None, default is kept."""
+        decoder = _Decoder(cross_attns=None)
+        host = _Host(decoder=decoder)
+        host.config = types.SimpleNamespace(lyric_alignment_layers_config=None)
+        original = dict(host.custom_layers_config)
+        host._sync_alignment_config()
+        self.assertEqual(host.custom_layers_config, original)
+
+    def test_sync_when_no_config_object(self):
+        """When self.config is None (model not loaded), default is kept."""
+        decoder = _Decoder(cross_attns=None)
+        host = _Host(decoder=decoder)
+        host.config = None
+        original = dict(host.custom_layers_config)
+        host._sync_alignment_config()
+        self.assertEqual(host.custom_layers_config, original)
+
+
 class LyricAlignmentMixinTests(unittest.TestCase):
     """Cover success and no-attention regression behaviors."""
 

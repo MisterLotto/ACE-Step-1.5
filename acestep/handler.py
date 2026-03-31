@@ -125,7 +125,9 @@ class AceStepHandler(
         # Batch size
         self.batch_size = 2
         
-        # Custom layers config
+        # Default lyric alignment attention layers config for the 2B DiT model.
+        # When a model provides its own lyric_alignment_layers_config in its
+        # AceStepConfig, that value takes precedence (see _sync_alignment_config).
         self.custom_layers_config = {2: [6], 3: [10, 11], 4: [3], 5: [8, 9], 6: [8]}
         self.offload_to_cpu = False
         self.offload_dit_to_cpu = False
