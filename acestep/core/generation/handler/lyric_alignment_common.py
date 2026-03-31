@@ -3,6 +3,10 @@
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import torch
+from loguru import logger
+
+# Default lyric alignment attention layers config for the 2B DiT model.
+_DEFAULT_LAYERS_CONFIG: Dict[int, List[int]] = {2: [6], 3: [10, 11], 4: [3], 5: [8, 9], 6: [8]}
 
 
 class LyricAlignmentCommonMixin:
@@ -14,13 +18,27 @@ class LyricAlignmentCommonMixin:
         Called after ``self.config`` is set during model initialization.
         The model's ``lyric_alignment_layers_config`` (stored as
         ``{"layer_idx": [head_indices]}`` with string keys in JSON) takes
-        precedence over the handler's built-in 2B default.
+        precedence over the built-in 2B default.  When the field is absent
+        or invalid the default is always restored so that re-initialization
+        with a different model never leaves stale values behind.
         """
         raw = getattr(self.config, "lyric_alignment_layers_config", None) if self.config else None
-        if raw is None:
+        if not raw or not isinstance(raw, dict):
+            if raw is not None:
+                logger.warning(
+                    "[lyric_alignment] Ignoring invalid lyric_alignment_layers_config "
+                    "type: {}", type(raw).__name__,
+                )
+            self.custom_layers_config = dict(_DEFAULT_LAYERS_CONFIG)
             return
         # HuggingFace config JSON serializes dict keys as strings — convert to int.
-        self.custom_layers_config = {int(k): v for k, v in raw.items()}
+        try:
+            self.custom_layers_config = {int(k): [int(h) for h in v] for k, v in raw.items()}
+        except (TypeError, ValueError) as exc:
+            logger.warning(
+                "[lyric_alignment] Ignoring malformed lyric_alignment_layers_config: {}", exc,
+            )
+            self.custom_layers_config = dict(_DEFAULT_LAYERS_CONFIG)
 
     def _resolve_custom_layers_config(
         self, custom_layers_config: Optional[Dict[int, List[int]]]
