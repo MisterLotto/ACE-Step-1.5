@@ -45,10 +45,10 @@ from vector_quantize_pytorch import ResidualFSQ
 # Local config import with fallback
 try:
     from .configuration_acestep_v15 import AceStepConfig
-    from .apg_guidance import adg_forward, apg_forward, MomentumBuffer
+    from .apg_guidance import adg_forward, apg_forward, cfg_forward, MomentumBuffer
 except ImportError:
     from configuration_acestep_v15 import AceStepConfig
-    from apg_guidance import adg_forward, apg_forward, MomentumBuffer
+    from apg_guidance import adg_forward, apg_forward, cfg_forward, MomentumBuffer
 
 
 logger = logging.get_logger(__name__)
@@ -2076,15 +2076,12 @@ class AceStepConditionGenerationModel(AceStepPreTrainedModel):
                     vt2 = decoder_outputs2[0]
                     if do_cfg_guidance:
                         pred_cond2, pred_null_cond2 = vt2.chunk(2)
-                        if apply_cfg_guidance:
+                        # Recompute CFG interval for corrector timestep (t_prev, not t_curr)
+                        apply_cfg_corrector = t_prev >= cfg_interval_start and t_prev <= cfg_interval_end
+                        if apply_cfg_corrector:
                             if not use_adg:
-                                vt2 = apg_forward(
-                                    pred_cond=pred_cond2,
-                                    pred_uncond=pred_null_cond2,
-                                    guidance_scale=diffusion_guidance_sale,
-                                    momentum_buffer=momentum_buffer,
-                                    dims=[1],
-                                )
+                                # Use basic CFG for corrector to avoid mutating APG momentum twice per step
+                                vt2 = cfg_forward(pred_cond2, pred_null_cond2, diffusion_guidance_sale)
                             else:
                                 vt2 = adg_forward(
                                     latents=xt_predicted,
