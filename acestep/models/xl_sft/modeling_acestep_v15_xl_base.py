@@ -1932,8 +1932,6 @@ class AceStepConditionGenerationModel(AceStepPreTrainedModel):
         time_costs["encoder_time_cost"] = end_time - start_time
         start_time = end_time
 
-        # Calculate cover steps based on audio_cover_strength
-        cover_steps = int(infer_steps * audio_cover_strength)
         device, dtype = context_latents.device, context_latents.dtype
 
         # Use custom timesteps if provided, otherwise compute from infer_steps and shift
@@ -1945,6 +1943,9 @@ class AceStepConditionGenerationModel(AceStepPreTrainedModel):
             # Apply shift transformation to timesteps if shift != 1.0
             if shift != 1.0:
                 t = shift * t / (1 + (shift - 1) * t)
+
+        # Calculate cover steps AFTER timesteps override so infer_steps is correct
+        cover_steps = int(infer_steps * audio_cover_strength)
         if use_progress_bar:
             iterator = tqdm(zip(t[:-1], t[1:]), total=infer_steps)
         else:
