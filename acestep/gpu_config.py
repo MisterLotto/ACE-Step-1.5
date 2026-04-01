@@ -13,6 +13,7 @@ Centralized GPU memory detection and adaptive configuration management
 """
 
 import os
+import re
 import sys
 from dataclasses import dataclass
 from typing import Optional, List, Dict, Tuple
@@ -180,6 +181,15 @@ DIT_INFERENCE_VRAM_PER_BATCH = {
 VRAM_SAFETY_MARGIN_GB = 0.5
 
 
+def _has_path_token(token: str, path: str) -> bool:
+    """Check if *token* appears as a delimited word in *path*.
+
+    Matches when *token* is bounded by start/end of string or a common
+    path delimiter (``/``, ``\\``, ``.``, ``_``, ``-``).
+    """
+    return re.search(rf"(^|[\\/._-]){token}($|[\\/._-])", path) is not None
+
+
 def get_dit_type_from_path(config_path: str) -> str:
     """Derive the DiT type key from a model checkpoint path.
 
@@ -195,15 +205,10 @@ def get_dit_type_from_path(config_path: str) -> str:
         "acestep-v15-base"      -> "base"
         "acestep-v15-sft"       -> "base"       (sft shares base VRAM profile)
     """
-    import re
-
-    def _has(token: str, path: str) -> bool:
-        return re.search(rf"(^|[\\/._-]){token}($|[\\/._-])", path) is not None
-
     path = (config_path or "").lower()
-    is_xl = _has("xl", path)
+    is_xl = _has_path_token("xl", path)
 
-    if _has("turbo", path):
+    if _has_path_token("turbo", path):
         variant = "turbo"
     else:
         # Both "base" and "sft" use the base VRAM profile (CFG doubles forward)
