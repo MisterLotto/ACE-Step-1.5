@@ -438,7 +438,7 @@ class MLXDiTDecoder(nn.Module):
         layer_types: Optional[list] = None,
         rope_theta: float = 1_000_000.0,
         max_position_embeddings: int = 32768,
-        encoder_hidden_size: int = None,
+        encoder_hidden_size: Optional[int] = None,
     ):
         super().__init__()
         self.hidden_size = hidden_size
