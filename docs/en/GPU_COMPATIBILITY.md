@@ -15,7 +15,7 @@ ACE-Step 1.5 automatically adapts to your GPU's available VRAM, adjusting genera
 | 20-24GB | Tier 6b | ✅ | 0.6B, 1.7B, 4B | 1.7B | vllm | 8 min / 8 min | 8 / 8 | None | None |
 | ≥24GB | Unlimited | ✅ | All (0.6B, 1.7B, 4B) | 4B | vllm | 10 min / 10 min | 8 / 8 | None | None |
 
-> **XL (4B) DiT column**: ❌ = not supported, ⚠️ = marginal (offload + quantization required, reduced batch), ✅ (offload) = supported with CPU offload, ✅ = fully supported. XL models use ~9GB VRAM for weights (vs ~4.7GB for 2B). All LM models are compatible with XL.
+> **XL (4B) DiT column**: ❌ = not supported, ⚠️ = marginal (offload + quantization required, reduced batch; works on 12-16GB with aggressive offload), ✅ (offload) = supported with CPU offload, ✅ = fully supported. XL models use ~9GB VRAM for weights (vs ~4.7GB for 2B). All LM models are compatible with XL.
 
 ### Column Descriptions
 

@@ -254,13 +254,13 @@ This greatly expands **customization and playability**—train a model unique to
 
 XL models use a larger 4B-parameter DiT decoder for higher audio quality. They come in the same three variants (base, sft, turbo) and behave identically — just with better generation quality. **All LM models (0.6B / 1.7B / 4B) are fully compatible with XL.**
 
-**Requirements:** XL models need ~9GB VRAM for weights (vs ~4.7GB for 2B). Minimum 16GB VRAM with CPU offload, 20GB+ recommended.
+**Requirements:** XL models need ~9GB VRAM for weights (vs ~4.7GB for 2B). Minimum 12GB VRAM with offload + quantization, 20GB+ recommended.
 
-| XL Model | Steps | CFG | VRAM | Notes |
-|----------|:-----:|:---:|:----:|-------|
-| `xl-turbo` | 8 | ❌ | ≥16GB | Fast + high quality, best daily driver on 20GB+ GPUs |
-| `xl-sft` | 50 | ✅ | ≥16GB | Highest quality, tunable CFG |
-| `xl-base` | 50 | ✅ | ≥16GB | All tasks including extract/lego/complete |
+| XL Model (full name) | Steps | CFG | VRAM | Notes |
+|----------------------|:-----:|:---:|:----:|-------|
+| `acestep-v15-xl-turbo` | 8 | ❌ | ≥12GB | Fast + high quality, best daily driver on 20GB+ GPUs |
+| `acestep-v15-xl-sft` | 50 | ✅ | ≥12GB | Highest quality, tunable CFG |
+| `acestep-v15-xl-base` | 50 | ✅ | ≥12GB | All tasks including extract/lego/complete |
 
 #### DiT Selection Summary
 
@@ -269,9 +269,9 @@ XL models use a larger 4B-parameter DiT decoder for higher audio quality. They c
 | `turbo` (default) | 8 | ❌ | ⚡⚡⚡ | — | Daily use, rapid iteration |
 | `sft` | 50 | ✅ | ⚡ | — | Pursuing details, like tuning |
 | `base` | 50 | ✅ | ⚡ | extract, lego, complete | Special tasks, large-scale fine-tuning |
-| **`xl-turbo`** | 8 | ❌ | ⚡⚡ | — | Best daily driver on 20GB+ GPUs |
-| **`xl-sft`** | 50 | ✅ | ⚡ | — | Highest quality, ≥16GB VRAM |
-| **`xl-base`** | 50 | ✅ | ⚡ | extract, lego, complete | All tasks with higher quality, ≥16GB VRAM |
+| **`acestep-v15-xl-turbo`** | 8 | ❌ | ⚡⚡ | — | Best daily driver on 20GB+ GPUs |
+| **`acestep-v15-xl-sft`** | 50 | ✅ | ⚡ | — | Highest quality, ≥12GB VRAM |
+| **`acestep-v15-xl-base`** | 50 | ✅ | ⚡ | extract, lego, complete | All tasks with higher quality, ≥12GB VRAM |
 
 ### Combination Strategies
 

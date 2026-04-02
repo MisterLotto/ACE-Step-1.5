@@ -118,11 +118,11 @@ Open http://localhost:7860 (Gradio) or http://localhost:8001 (API).
 | **≤6GB** | 2B turbo | None (DiT only) | — | LM disabled by default; INT8 quantization + full CPU offload |
 | **6-8GB** | 2B turbo | `acestep-5Hz-lm-0.6B` | `pt` | Lightweight LM with PyTorch backend |
 | **8-16GB** | 2B turbo/sft | `acestep-5Hz-lm-0.6B` / `1.7B` | `vllm` | 0.6B for 8-12GB, 1.7B for 12-16GB |
-| **16-20GB** | 2B sft or XL turbo | `acestep-5Hz-lm-1.7B` | `vllm` | XL requires CPU offload on 16GB |
+| **16-20GB** | 2B sft or XL turbo | `acestep-5Hz-lm-1.7B` | `vllm` | XL requires CPU offload below 20GB |
 | **20-24GB** | XL turbo/sft | `acestep-5Hz-lm-1.7B` | `vllm` | XL fits without offload; 4B LM available |
 | **≥24GB** | XL sft | `acestep-5Hz-lm-4B` | `vllm` | Best quality, all models fit without offload |
 
-> **XL (4B) models** (`acestep-v15-xl-*`) offer higher audio quality with ~9GB VRAM for weights (vs ~4.7GB for 2B). They require ≥16GB VRAM (with offload) or ≥20GB (without offload). All LM models are fully compatible with XL.
+> **XL (4B) models** (`acestep-v15-xl-*`) offer higher audio quality with ~9GB VRAM for weights (vs ~4.7GB for 2B). They require ≥12GB VRAM (with offload + quantization) or ≥20GB (without offload). All LM models are fully compatible with XL.
 
 The UI automatically selects the best configuration for your GPU. All settings (LM model, backend, offloading, quantization) are tier-aware and pre-configured.
 
@@ -249,7 +249,7 @@ See also the **LoRA Training** tab in Gradio UI for one-click training, or [Grad
 
 ### XL (4B) DiT Models
 
-> XL models use a larger 4B-parameter DiT decoder (~9GB bf16) for higher audio quality. They require ≥16GB VRAM (with offload) or ≥20GB (without offload). All LM models are fully compatible.
+> XL models use a larger 4B-parameter DiT decoder (~9GB bf16) for higher audio quality. They require ≥12GB VRAM (with offload + quantization) or ≥20GB (without offload). All LM models are fully compatible.
 
 | DiT Model | Pre-Training | SFT | RL | CFG | Step | Refer audio | Text2Music | Cover | Repaint | Extract | Lego | Complete | Quality | Diversity | Fine-Tunability | Hugging Face |
 |-----------|:------------:|:---:|:--:|:---:|:----:|:-----------:|:----------:|:-----:|:-------:|:-------:|:----:|:--------:|:-------:|:---------:|:---------------:|--------------|

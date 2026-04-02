@@ -654,7 +654,7 @@ huggingface-cli download ACE-Step/Ace-Step1.5 --local-dir ./checkpoints
 huggingface-cli download ACE-Step/acestep-5Hz-lm-0.6B --local-dir ./checkpoints/acestep-5Hz-lm-0.6B
 huggingface-cli download ACE-Step/acestep-5Hz-lm-4B --local-dir ./checkpoints/acestep-5Hz-lm-4B
 
-# XL (4B) DiT models — requires ≥16GB VRAM
+# XL (4B) DiT models - requires ≥12GB VRAM (with offload)
 huggingface-cli download ACE-Step/acestep-v15-xl-base --local-dir ./checkpoints/acestep-v15-xl-base
 huggingface-cli download ACE-Step/acestep-v15-xl-sft --local-dir ./checkpoints/acestep-v15-xl-sft
 huggingface-cli download ACE-Step/acestep-v15-xl-turbo --local-dir ./checkpoints/acestep-v15-xl-turbo
@@ -672,9 +672,9 @@ huggingface-cli download ACE-Step/acestep-v15-xl-turbo --local-dir ./checkpoints
 | acestep-v15-turbo-shift1 | Turbo DiT with shift1 | [Link](https://huggingface.co/ACE-Step/acestep-v15-turbo-shift1) |
 | acestep-v15-turbo-shift3 | Turbo DiT with shift3 | [Link](https://huggingface.co/ACE-Step/acestep-v15-turbo-shift3) |
 | acestep-v15-turbo-continuous | Turbo DiT with continuous shift (1-5) | [Link](https://huggingface.co/ACE-Step/acestep-v15-turbo-continuous) |
-| **acestep-v15-xl-base** | XL (4B) Base DiT — higher quality, ≥16GB VRAM | [Link](https://huggingface.co/ACE-Step/acestep-v15-xl-base) |
-| **acestep-v15-xl-sft** | XL (4B) SFT DiT — higher quality, ≥16GB VRAM | [Link](https://huggingface.co/ACE-Step/acestep-v15-xl-sft) |
-| **acestep-v15-xl-turbo** | XL (4B) Turbo DiT — higher quality, ≥16GB VRAM | [Link](https://huggingface.co/ACE-Step/acestep-v15-xl-turbo) |
+| **acestep-v15-xl-base** | XL (4B) Base DiT — higher quality, ≥12GB VRAM | [Link](https://huggingface.co/ACE-Step/acestep-v15-xl-base) |
+| **acestep-v15-xl-sft** | XL (4B) SFT DiT — higher quality, ≥12GB VRAM | [Link](https://huggingface.co/ACE-Step/acestep-v15-xl-sft) |
+| **acestep-v15-xl-turbo** | XL (4B) Turbo DiT — higher quality, ≥12GB VRAM | [Link](https://huggingface.co/ACE-Step/acestep-v15-xl-turbo) |
 
 ---
 
@@ -687,7 +687,7 @@ ACE-Step automatically adapts to your GPU's VRAM. The UI pre-configures all sett
 | **≤6GB** | 2B turbo | None (DiT only) | — | LM disabled; INT8 quantization + full CPU offload |
 | **6-8GB** | 2B turbo | `acestep-5Hz-lm-0.6B` | `pt` | Lightweight LM with PyTorch backend |
 | **8-16GB** | 2B turbo/sft | `0.6B` / `1.7B` | `vllm` | 0.6B for 8-12GB, 1.7B for 12-16GB |
-| **16-20GB** | 2B sft or XL turbo | `acestep-5Hz-lm-1.7B` | `vllm` | XL requires CPU offload on 16GB |
+| **16-20GB** | 2B sft or XL turbo | `acestep-5Hz-lm-1.7B` | `vllm` | XL requires CPU offload below 20GB |
 | **20-24GB** | XL turbo/sft | `acestep-5Hz-lm-1.7B` | `vllm` | XL fits without offload; 4B LM available |
 | **≥24GB** | XL sft | `acestep-5Hz-lm-4B` | `vllm` | Best quality, all models fit without offload |
 
