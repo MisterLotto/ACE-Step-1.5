@@ -689,7 +689,7 @@ ACE-Step automatically adapts to your GPU's VRAM. The UI pre-configures all sett
 | **8-16GB** | 2B turbo/sft | `0.6B` / `1.7B` | `vllm` | 0.6B for 8-12GB, 1.7B for 12-16GB |
 | **16-20GB** | 2B sft or XL turbo | `acestep-5Hz-lm-1.7B` | `vllm` | XL requires CPU offload below 20GB |
 | **20-24GB** | XL turbo/sft | `acestep-5Hz-lm-1.7B` | `vllm` | XL fits without offload; 4B LM available |
-| **≥24GB** | XL sft | `acestep-5Hz-lm-4B` | `vllm` | Best quality, all models fit without offload |
+| **≥24GB** | XL sft (or xl-base for extract/lego/complete) | `acestep-5Hz-lm-4B` | `vllm` | Best quality, all models fit without offload |
 
 > 📖 For detailed GPU compatibility information (tier table, duration limits, batch sizes, adaptive UI defaults, memory optimization), see [GPU Compatibility Guide](GPU_COMPATIBILITY.md).
 

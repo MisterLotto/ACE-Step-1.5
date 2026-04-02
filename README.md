@@ -120,7 +120,7 @@ Open http://localhost:7860 (Gradio) or http://localhost:8001 (API).
 | **8-16GB** | 2B turbo/sft | `acestep-5Hz-lm-0.6B` / `1.7B` | `vllm` | 0.6B for 8-12GB, 1.7B for 12-16GB |
 | **16-20GB** | 2B sft or XL turbo | `acestep-5Hz-lm-1.7B` | `vllm` | XL requires CPU offload below 20GB |
 | **20-24GB** | XL turbo/sft | `acestep-5Hz-lm-1.7B` | `vllm` | XL fits without offload; 4B LM available |
-| **≥24GB** | XL sft | `acestep-5Hz-lm-4B` | `vllm` | Best quality, all models fit without offload |
+| **≥24GB** | XL sft (or xl-base for extract/lego/complete) | `acestep-5Hz-lm-4B` | `vllm` | Best quality, all models fit without offload |
 
 > **XL (4B) models** (`acestep-v15-xl-*`) offer higher audio quality with ~9GB VRAM for weights (vs ~4.7GB for 2B). They require ≥12GB VRAM (with offload + quantization) or ≥20GB (without offload). All LM models are fully compatible with XL.
 
