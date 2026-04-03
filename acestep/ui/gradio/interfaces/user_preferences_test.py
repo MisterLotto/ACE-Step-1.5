@@ -199,6 +199,20 @@ class RestoreTests(unittest.TestCase):
         self.assertTrue(sr_update["visible"])
         self.assertTrue(sr_update["interactive"])
 
+    def test_restore_preferences_empty_with_num_outputs(self):
+        """When called with no values but _num_outputs set, should return
+        that many no-op gr.update() dicts instead of crashing."""
+        result = restore_preferences(_num_outputs=_NUM_OUTPUTS)
+        self.assertEqual(len(result), _NUM_OUTPUTS)
+        for v in result:
+            self.assertIsInstance(v, dict)
+            self.assertEqual(v["__type__"], "update")
+
+    def test_restore_preferences_empty_without_num_outputs(self):
+        """When called with no values and no _num_outputs, returns empty."""
+        result = restore_preferences()
+        self.assertEqual(result, ())
+
     def test_pref_keys_match_defaults(self):
         """Every PREF_KEY must have a corresponding default."""
         for key in PREF_KEYS:
