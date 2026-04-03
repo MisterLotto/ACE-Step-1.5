@@ -603,6 +603,20 @@ def generate_music(
             logger.info(f"[generate_music] {params.task_type} task: using params.caption='{params.caption}', params.lyrics='{params.lyrics}'")
             logger.info(f"[generate_music] Final inputs: dit_input_caption='{dit_input_caption}', dit_input_lyrics='{dit_input_lyrics}'")
 
+        # For source-audio tasks (cover/repaint/lego/extract), the output
+        # duration must match the source audio — ignore any caller-supplied
+        # or LM-generated audio_duration so the handler derives it from
+        # processed_src_audio instead.
+        _src_audio_tasks = {"cover", "repaint", "lego", "extract"}
+        if params.task_type in _src_audio_tasks:
+            if audio_duration is not None and audio_duration > 0:
+                logger.info(
+                    "[generate_music] {} task: discarding caller-supplied "
+                    "audio_duration={:.1f}; handler will use src_audio length",
+                    params.task_type, float(audio_duration),
+                )
+            audio_duration = None
+
         # Phase 2: DiT music generation
         # Use seed_for_generation (from config.seed or params.seed) instead of params.seed for actual generation
         dit_generate_kwargs = {
