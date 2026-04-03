@@ -370,6 +370,8 @@ def create_gradio_interface(dit_handler, llm_handler, dataset_handler, init_para
         setup_training_event_handlers(demo, dit_handler, llm_handler, training_section)
 
         # Restore user preferences from browser localStorage on page load.
-        wire_preference_restore(demo, generation_section)
+        # In service mode, skip restore so localStorage cannot override
+        # server-configured init_params or locked controls.
+        wire_preference_restore(demo, generation_section, service_mode=service_mode)
 
     return demo
