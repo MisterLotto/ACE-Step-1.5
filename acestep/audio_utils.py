@@ -167,12 +167,11 @@ class AudioSaver:
                 backend='soundfile',
             )
             cmd = [
-                'ffmpeg', '-y', '-hide_banner', '-loglevel', 'error',
+                r'H:\tools\ffmpeg.exe', '-y', '-hide_banner', '-loglevel', 'error',
                 '-i', str(temp_wav_path),
                 '-codec:a', 'libmp3lame',
                 '-ar', str(int(target_sample_rate)),
                 '-b:a', bitrate,
-                '-abr', '0',
                 str(output_path),
             ]
             subprocess.run(cmd, check=True, capture_output=True, timeout=120)

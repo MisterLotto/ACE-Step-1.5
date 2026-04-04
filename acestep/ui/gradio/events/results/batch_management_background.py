@@ -119,6 +119,7 @@ def generate_next_batch_background(
             repaint_mode=params.get("repaint_mode", "balanced"),
             repaint_strength=params.get("repaint_strength", 0.5),
             progress=progress,
+            song_name=params.get("song_name", ""),
         )
 
         final_result = None

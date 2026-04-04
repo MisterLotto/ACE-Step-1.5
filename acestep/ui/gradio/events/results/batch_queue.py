@@ -189,7 +189,7 @@ def restore_batch_parameters(current_batch_index, batch_queue):
     """
     if current_batch_index not in batch_queue:
         gr.Warning(t("messages.no_batch_data"))
-        return [gr.update()] * 30
+        return [gr.update()] * 31
 
     batch_data = batch_queue[current_batch_index]
     params = batch_data.get("generation_params", {})
@@ -216,6 +216,7 @@ def restore_batch_parameters(current_batch_index, batch_queue):
     allow_lm_batch = params.get("allow_lm_batch", True)
     track_name = params.get("track_name", None)
     complete_track_classes = params.get("complete_track_classes", [])
+    song_name = params.get("song_name", "")
     enable_normalization = params.get("enable_normalization", True)
     normalization_db = params.get("normalization_db", -1.0)
     fade_in_duration = params.get("fade_in_duration", 0.0)
@@ -244,4 +245,5 @@ def restore_batch_parameters(current_batch_index, batch_queue):
         enable_normalization, normalization_db,
         fade_in_duration, fade_out_duration,
         latent_shift, latent_rescale,
+        song_name,
     )

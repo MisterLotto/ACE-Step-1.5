@@ -33,6 +33,7 @@ from acestep.ui.gradio.interfaces.audio_player_preferences import (
 )
 from acestep.ui.gradio.interfaces.result import create_results_section
 from acestep.ui.gradio.interfaces.training import create_training_section
+from acestep.ui.gradio.interfaces.library_tab import create_library_section
 from acestep.ui.gradio.events import setup_event_handlers, setup_training_event_handlers
 from acestep.ui.gradio.help_content import create_help_button, HELP_MODAL_CSS
 
@@ -341,12 +342,35 @@ def create_gradio_interface(dit_handler, llm_handler, dataset_handler, init_para
                 # Store the wrapper in gen_section so event handlers can toggle it
                 gen_section["results_wrapper"] = results_wrapper
             
+            # --- Library Tab ---
+            with gr.Tab("🎵 Library"):
+                library_section = create_library_section()
+
             # --- Training Tab ---
             with gr.Tab(t("training.tab_title"), visible=not service_mode):
                 training_section = create_training_section(
                     dit_handler, llm_handler, init_params=init_params
                 )
         
+        # ── Auto-populate library on page load ──────────────────────────────
+        from acestep.ui.gradio.events.library_handlers import scan_library as _lib_scan
+        from acestep.ui.gradio.events.library_handlers import get_library_rows as _lib_rows
+
+        def _lib_initial_load():
+            songs = _lib_scan()
+            rows = _lib_rows(songs)
+            n = len(songs)
+            return rows, songs, f"**{n}** song{'s' if n != 1 else ''} found"
+
+        demo.load(
+            fn=_lib_initial_load,
+            outputs=[
+                library_section["lib_table"],
+                library_section["lib_songs_state"],
+                library_section["lib_count"],
+            ],
+        )
+
         # ═══════════════════════════════════════════
         # Merge all generation-related component dicts for event wiring
         # ═══════════════════════════════════════════

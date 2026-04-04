@@ -6,6 +6,7 @@ pipeline, saves audio files, and optionally runs auto-scoring and
 auto-LRC in a single streaming pass.
 """
 import os
+import re
 import json
 import time as time_module
 
@@ -31,6 +32,13 @@ from acestep.ui.gradio.events.results.audio_playback_updates import (
 )
 from acestep.ui.gradio.events.results.scoring import calculate_score_handler
 from acestep.ui.gradio.events.results.lrc_utils import lrc_to_vtt_file
+
+
+def _sanitize_filename(name: str) -> str:
+    """Strip characters that are invalid in file names across platforms."""
+    sanitized = re.sub(r'[<>:"/\\|?*\x00-\x1f]', "_", name)
+    sanitized = sanitized.strip(". ")
+    return sanitized[:200]
 
 
 def generate_with_progress(
@@ -60,6 +68,7 @@ def generate_with_progress(
     repaint_mode,
     repaint_strength,
     progress=gr.Progress(track_tqdm=True),
+    song_name="",
 ):
     """Generate audio with progress tracking.
 
@@ -251,10 +260,23 @@ def generate_with_progress(
         temp_dir = os.path.join(DEFAULT_RESULTS_DIR, f"batch_{timestamp}")
         temp_dir = os.path.abspath(temp_dir).replace("\\", "/")
         os.makedirs(temp_dir, exist_ok=True)
-        json_path = os.path.join(temp_dir, f"{key}.json").replace("\\", "/")
+
+        # Determine filename stem: use song_name when provided, else fall back to UUID key.
+        # Each audio in a batch gets timestamp + i so all names are unique across batches
+        # and within a batch, with no numbering suffix needed.
+        if song_name and song_name.strip():
+            base = _sanitize_filename(song_name.strip())
+            if base:
+                dt_tag = time_module.strftime("%Y%m%d_%H%M%S", time_module.localtime(timestamp + i))
+                filename_stem = f"{base} - {dt_tag}"
+            else:
+                filename_stem = key
+        else:
+            filename_stem = key
 
         ext = "wav" if audio_format == "wav32" else audio_format
-        audio_path = os.path.join(temp_dir, f"{key}.{ext}").replace("\\", "/")
+        json_path = os.path.join(temp_dir, f"{filename_stem}.json").replace("\\", "/")
+        audio_path = os.path.join(temp_dir, f"{filename_stem}.{ext}").replace("\\", "/")
 
         saved_path = save_audio(
             audio_data=audio_tensor, output_path=audio_path,

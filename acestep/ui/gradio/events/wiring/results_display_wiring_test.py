@@ -43,6 +43,7 @@ _EXPECTED_RESTORE_OUTPUT_KEYS = [
     "fade_out_duration",
     "latent_shift",
     "latent_rescale",
+    "song_name",
 ]
 
 _EXPECTED_JS_MARKERS = [

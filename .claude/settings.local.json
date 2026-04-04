@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -E \"\\\\.py$\")",
+      "Bash(python -c \":*)",
+      "Bash(xargs grep:*)",
+      "Bash(python -c \"import gradio; print\\(gradio.__version__\\); import inspect; print\\([p for p in inspect.signature\\(gradio.Audio.__init__\\).parameters]\\)\")",
+      "Bash(.venvScriptspython -c \"import gradio; print\\(gradio.__version__\\); import inspect; print\\([p for p in inspect.signature\\(gradio.Audio.__init__\\).parameters]\\)\")",
+      "Bash(\".venv/Scripts/python\" -c \"import gradio; print\\(gradio.__version__\\); import inspect; print\\([p for p in inspect.signature\\(gradio.Audio.__init__\\).parameters]\\)\")"
+    ]
+  }
+}

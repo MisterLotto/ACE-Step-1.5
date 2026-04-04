@@ -114,6 +114,15 @@ def build_optional_parameter_controls(
                 elem_classes=["has-info-container"],
                 interactive=not service_mode,
             )
+        with gr.Row():
+            song_name = gr.Textbox(
+                label=t("generation.song_name_label"),
+                placeholder=t("generation.song_name_placeholder"),
+                info=t("generation.song_name_info"),
+                value="",
+                elem_classes=["has-info-container"],
+                interactive=not service_mode,
+            )
         with gr.Row(elem_classes=["auto-toggles-row"]):
             duration_auto = gr.Checkbox(
                 label=t("generation.duration_auto_label"),
@@ -136,6 +145,7 @@ def build_optional_parameter_controls(
         "vocal_lang_auto": vocal_lang_auto,
         "audio_duration": audio_duration,
         "batch_size_input": batch_size_input,
+        "song_name": song_name,
         "duration_auto": duration_auto,
         "reset_all_auto_btn": reset_all_auto_btn,
     }
