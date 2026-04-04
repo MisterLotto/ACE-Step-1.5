@@ -27,14 +27,12 @@ from __future__ import annotations
 
 import argparse
 import gc
-import logging
 import sys
+import traceback
 
 from acestep.training_v2.cli.common import build_configs
 from acestep.training_v2.model_loader import load_decoder_for_training
 from acestep.training_v2.trainer_fixed import FixedLoRATrainer
-
-logger = logging.getLogger(__name__)
 
 
 def _cleanup_gpu() -> None:
@@ -146,9 +144,9 @@ def _run_preprocess(args: argparse.Namespace) -> int:
     """
     from acestep.training_v2.preprocess import preprocess_audio_files
 
-    audio_dir = getattr(args, "audio_dir", None)
-    dataset_json = getattr(args, "dataset_json", None)
-    tensor_output = getattr(args, "tensor_output", None)
+    audio_dir = args.audio_dir
+    dataset_json = args.dataset_json
+    tensor_output = args.tensor_output
 
     if not audio_dir and not dataset_json:
         print("[FAIL] --audio-dir or --dataset-json is required for preprocessing.", file=sys.stderr)
@@ -165,7 +163,7 @@ def _run_preprocess(args: argparse.Namespace) -> int:
     print(f"  Output:        {tensor_output}")
     print(f"  Checkpoint:    {args.checkpoint_dir}")
     print(f"  Model variant: {args.model_variant}")
-    print(f"  Max duration:  {getattr(args, 'max_duration', 240.0)}s")
+    print(f"  Max duration:  {args.max_duration}s")
     print("=" * 60)
     print("[INFO] Two-pass pipeline (sequential model loading for low VRAM)")
 
@@ -175,24 +173,24 @@ def _run_preprocess(args: argparse.Namespace) -> int:
             output_dir=tensor_output,
             checkpoint_dir=args.checkpoint_dir,
             variant=args.model_variant,
-            max_duration=getattr(args, "max_duration", 240.0),
+            max_duration=args.max_duration,
             dataset_json=dataset_json,
-            device=getattr(args, "device", "auto"),
-            precision=getattr(args, "precision", "auto"),
+            device=args.device,
+            precision=args.precision,
         )
     except Exception as exc:
         print(f"[FAIL] Preprocessing failed: {exc}", file=sys.stderr)
-        logger.exception("Preprocessing error in standalone entrypoint")
+        traceback.print_exc()
         return 1
     finally:
         _cleanup_gpu()
 
-    print(f"\n[OK] Preprocessing complete:")
+    print("\n[OK] Preprocessing complete:")
     print(f"     Processed: {result['processed']}/{result['total']}")
     if result["failed"]:
         print(f"     Failed:    {result['failed']}")
     print(f"     Output:    {result['output_dir']}")
-    print(f"\n[INFO] You can now train with:")
+    print("\n[INFO] You can now train with:")
     print(f"       python -m acestep.training_v2.cli.train_fixed --dataset-dir {result['output_dir']} ...")
     return 0
 
@@ -214,7 +212,7 @@ def main() -> int:
     args = parser.parse_args()
     args.subcommand = "fixed"
 
-    if getattr(args, "preprocess", False):
+    if args.preprocess:
         return _run_preprocess(args)
 
     if not validate_paths(args):
