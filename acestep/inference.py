@@ -296,7 +296,7 @@ def _update_metadata_from_lm(
 ) -> Tuple[Optional[int], str, str, Optional[float], str, str, str]:
     """Update metadata fields from LM output if not provided by user."""
 
-    if bpm is None and metadata.get('bpm'):
+    if (not bpm or bpm <= 0) and metadata.get('bpm'):
         bpm_value = metadata.get('bpm')
         if bpm_value not in ["N/A", ""]:
             try:

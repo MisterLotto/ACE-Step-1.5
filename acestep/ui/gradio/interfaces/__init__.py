@@ -309,6 +309,16 @@ def create_gradio_interface(dit_handler, llm_handler, dataset_handler, init_para
             width: 13px !important;
             height: 13px !important;
         }
+        /* Library tab: selected song panel scrolling.
+           gr.Group's inner BaseForm div has overflow-y:hidden baked in via
+           a scoped Svelte class — override it and add a bounded scroll area. */
+        #lib-selected-panel > div {
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            max-height: 72vh !important;
+            flex-direction: column !important;
+            flex-wrap: nowrap !important;
+        }
         """ + HELP_MODAL_CSS,
     ) as demo:
         

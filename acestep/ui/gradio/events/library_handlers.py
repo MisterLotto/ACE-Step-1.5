@@ -103,12 +103,15 @@ def scan_library(sort_by: str = "date", min_rating: int = 0) -> list:
             caption = metadata.get("caption", "") or ""
             caption_preview = (caption[:80] + "…") if len(caption) > 80 else caption
 
+            raw_bpm = metadata.get("cot_bpm") or metadata.get("bpm")
+            bpm_display = str(int(raw_bpm)) if raw_bpm else "auto"
+
             songs.append({
                 "path": audio_path,
                 "stem": stem,
                 "date_str": _format_date(ts),
                 "ts": ts,
-                "bpm": metadata.get("bpm") or "auto",
+                "bpm": bpm_display,
                 "caption": caption_preview,
                 "rating": rating,
                 "metadata": metadata,
@@ -126,7 +129,7 @@ def scan_library(sort_by: str = "date", min_rating: int = 0) -> list:
 def get_library_rows(songs: list) -> list:
     """Convert a song list to rows suitable for gr.Dataframe."""
     return [
-        [s["stem"], s["date_str"], str(s["bpm"]), rating_stars(s["rating"])]
+        [s["stem"], s["date_str"], rating_stars(s["rating"])]
         for s in songs
     ]
 
@@ -154,6 +157,10 @@ def delete_song(audio_path: str) -> tuple:
         json_path = stem + ".json"
         if os.path.exists(json_path):
             os.remove(json_path)
+        # Remove the parent folder if it is now empty
+        parent = os.path.dirname(audio_path)
+        if parent and os.path.isdir(parent) and not os.listdir(parent):
+            os.rmdir(parent)
         ratings = _load_ratings()
         ratings.pop(audio_path, None)
         _save_ratings(ratings)

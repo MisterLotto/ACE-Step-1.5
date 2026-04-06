@@ -57,7 +57,7 @@ def create_library_section() -> dict[str, Any]:
         lib_songs_state = gr.State([])
 
         # ── Selected song panel ───────────────────────────────────────────────
-        with gr.Group(visible=False) as lib_selected_panel:
+        with gr.Group(visible=False, elem_id="lib-selected-panel") as lib_selected_panel:
             gr.Markdown("---")
             with gr.Row():
                 with gr.Column(scale=3):
@@ -79,14 +79,14 @@ def create_library_section() -> dict[str, Any]:
                         lib_delete_btn = gr.Button("🗑️ Delete", variant="stop", scale=1)
                     lib_status = gr.Markdown("")
 
-            with gr.Accordion("Generation Details", open=False):
+            with gr.Accordion("Generation Details", open=True):
                 lib_caption = gr.Textbox(label="Caption", interactive=False, lines=3)
                 with gr.Row():
-                    lib_bpm_field    = gr.Textbox(label="BPM",      interactive=False, scale=1)
-                    lib_key_field    = gr.Textbox(label="Key",       interactive=False, scale=1)
-                    lib_seed_field   = gr.Textbox(label="Seed",      interactive=False, scale=1)
-                    lib_dur_field    = gr.Textbox(label="Duration",  interactive=False, scale=1)
-                lib_lyrics = gr.Textbox(label="Lyrics", interactive=False, lines=6)
+                    lib_bpm_field    = gr.Textbox(label="BPM",       interactive=False, scale=1)
+                    lib_key_field    = gr.Textbox(label="Key",        interactive=False, scale=1)
+                    lib_seed_field   = gr.Textbox(label="Seed",       interactive=False, scale=1)
+                    lib_dur_field    = gr.Textbox(label="Duration",   interactive=False, scale=1)
+                lib_lyrics = gr.Textbox(label="Lyrics", interactive=False, lines=12, max_lines=50)
 
         # State: path of the currently selected audio file
         lib_selected_path = gr.State(None)
@@ -100,12 +100,15 @@ def create_library_section() -> dict[str, Any]:
         count_md = f"**{n}** song{'s' if n != 1 else ''} found"
         return rows, songs, count_md
 
-    def _select_song(songs, evt: gr.SelectData):
+    def _select_song(songs, sort_by, min_rating, evt: gr.SelectData):
         """Populate the selected-song panel when a table row is clicked."""
+        # If state is empty (race condition on first load), scan now
+        if not songs:
+            songs = scan_library(sort_by=sort_by, min_rating=int(min_rating or 0))
         if not songs or evt.index[0] >= len(songs):
             return (
                 gr.update(visible=False), None, "", None,
-                "", "", "", "", "", "", None,
+                "", "", "", "", "", "", "", None,
             )
         song = songs[evt.index[0]]
         path = song["path"]
@@ -114,11 +117,21 @@ def create_library_section() -> dict[str, Any]:
         rating_val = int(song["rating"]) if song["rating"] else None
         name_md = f"### {song['stem']}\n_{song['date_str']}_"
 
-        bpm   = str(meta.get("bpm", "auto") or "auto")
-        key   = meta.get("keyscale", "") or ""
-        seed  = str(meta.get("seed", "") or "")
-        dur   = meta.get("duration", -1)
-        dur   = "auto" if str(dur) == "-1" else str(dur)
+        raw_bpm = meta.get("cot_bpm") or meta.get("bpm")
+        bpm = str(int(raw_bpm)) if raw_bpm else "auto"
+
+        key  = meta.get("keyscale") or meta.get("cot_keyscale") or ""
+
+        seed = str(meta.get("seed", "") or "")
+
+        raw_dur = meta.get("duration", -1)
+        if raw_dur is None or raw_dur == -1:
+            raw_dur = meta.get("cot_duration")
+        if raw_dur and raw_dur != -1:
+            secs = int(raw_dur)
+            dur = f"{secs // 60}:{secs % 60:02d}"
+        else:
+            dur = "auto"
         caption = meta.get("caption", "") or ""
         lyrics  = meta.get("lyrics", "") or ""
 
@@ -193,7 +206,7 @@ def create_library_section() -> dict[str, Any]:
     # Row select
     lib_table.select(
         fn=_select_song,
-        inputs=[lib_songs_state],
+        inputs=[lib_songs_state, lib_sort, lib_filter],
         outputs=[
             lib_selected_panel,
             lib_audio,
@@ -210,8 +223,8 @@ def create_library_section() -> dict[str, Any]:
         ],
     )
 
-    # Rating change → auto-save
-    lib_rating.change(
+    # Rating change → auto-save (use .input so programmatic updates from _select_song don't trigger a spurious re-scan)
+    lib_rating.input(
         fn=_save_rating,
         inputs=[lib_selected_path, lib_rating, lib_songs_state, lib_sort, lib_filter],
         outputs=[lib_table, lib_songs_state, lib_count],

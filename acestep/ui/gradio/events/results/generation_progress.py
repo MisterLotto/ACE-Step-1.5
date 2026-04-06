@@ -15,7 +15,7 @@ import torch
 from loguru import logger
 
 from acestep.inference import generate_music, GenerationParams, GenerationConfig
-from acestep.audio_utils import save_audio
+from acestep.audio_utils import save_audio, write_audio_tags
 from acestep.gpu_config import (
     get_global_gpu_config,
     check_duration_limit,
@@ -288,6 +288,24 @@ def generate_with_progress(
 
         with open(json_path, 'w', encoding='utf-8') as f:
             json.dump(audio_params, f, indent=2, ensure_ascii=False)
+
+        # Embed metadata tags directly into the audio file
+        try:
+            _title = filename_stem.rsplit(" - ", 1)[0] if " - " in filename_stem else filename_stem
+            _key = audio_params.get("cot_keyscale") or audio_params.get("keyscale") or ""
+            _dur_secs = audio_params.get("cot_duration") or audio_params.get("duration")
+            _dur = "" if (not _dur_secs or _dur_secs == -1) else str(int(_dur_secs))
+            write_audio_tags(audio_path, {
+                "title":   _title,
+                "artist":  "ACE-Step",
+                "comment": audio_params.get("caption", ""),
+                "lyrics":  audio_params.get("lyrics", ""),
+                "key":     _key,
+                "TLEN":    _dur,   # track length in seconds (ID3 TLEN / Vorbis LENGTH)
+                "seed":    str(audio_params.get("seed", "")),
+            })
+        except Exception as _tag_exc:
+            logger.warning(f"[Tags] Skipped tag write for {audio_path}: {_tag_exc}")
 
         audio_outputs[i] = audio_path
         all_audio_paths.append(audio_path)

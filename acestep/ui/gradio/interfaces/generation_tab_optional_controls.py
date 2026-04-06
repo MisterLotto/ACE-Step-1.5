@@ -114,6 +114,14 @@ def build_optional_parameter_controls(
                 elem_classes=["has-info-container"],
                 interactive=not service_mode,
             )
+        with gr.Row(elem_classes=["auto-toggles-row"]):
+            duration_auto = gr.Checkbox(
+                label=t("generation.duration_auto_label"),
+                value=True,
+                container=False,
+                elem_classes=["auto-toggle"],
+            )
+            gr.HTML("<span></span>")  # spacer to keep Duration Auto left-aligned under Audio Duration
         with gr.Row():
             song_name = gr.Textbox(
                 label=t("generation.song_name_label"),
@@ -123,14 +131,6 @@ def build_optional_parameter_controls(
                 elem_classes=["has-info-container"],
                 interactive=not service_mode,
             )
-        with gr.Row(elem_classes=["auto-toggles-row"]):
-            duration_auto = gr.Checkbox(
-                label=t("generation.duration_auto_label"),
-                value=True,
-                container=False,
-                elem_classes=["auto-toggle"],
-            )
-            gr.HTML("<span></span>")
         reset_all_auto_btn = gr.Button(t("generation.reset_all_auto"), variant="secondary", size="sm")
 
     return {
