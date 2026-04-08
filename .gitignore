@@ -258,3 +258,6 @@ docs/.vitepress/dist/
 docs/.vitepress/cache/
 docs/en/awesome.md
 package-lock.json
+/.claude
+acestep-local.bat
+.claude/settings.local.json

@@ -1,6 +1,5 @@
 """Library tab backend: scan, rate, and delete generated songs."""
 
-import glob
 import json
 import os
 from datetime import datetime
@@ -50,6 +49,11 @@ def _format_date(ts: int) -> str:
 def scan_library(sort_by: str = "date", min_rating: int = 0) -> list:
     """Scan gradio_outputs for all generated audio files.
 
+    Walks the entire gradio_outputs tree recursively so that files in any
+    subdirectory structure are discovered.  The date shown for each file is
+    derived from its filesystem mtime, which is accurate regardless of the
+    parent directory's name.
+
     Args:
         sort_by: One of "date" (newest first), "name" (A-Z), "rating" (highest first).
         min_rating: If > 0, exclude songs with a lower rating (unrated = 0).
@@ -64,29 +68,23 @@ def scan_library(sort_by: str = "date", min_rating: int = 0) -> list:
     ratings = _load_ratings()
     songs = []
 
-    batch_dirs = sorted(
-        glob.glob(os.path.join(DEFAULT_RESULTS_DIR, "batch_*")),
-        key=lambda p: os.path.basename(p),
-        reverse=True,  # newest first by default
-    )
-
-    for batch_dir in batch_dirs:
-        try:
-            ts = int(os.path.basename(batch_dir).split("_")[1])
-        except (IndexError, ValueError):
-            ts = 0
-
-        for audio_file in sorted(os.listdir(batch_dir)):
-            stem, ext = os.path.splitext(audio_file)
+    for root, _dirs, files in os.walk(DEFAULT_RESULTS_DIR):
+        for filename in files:
+            stem, ext = os.path.splitext(filename)
             if ext.lower() not in AUDIO_EXTENSIONS:
                 continue
 
             audio_path = os.path.normpath(
-                os.path.join(batch_dir, audio_file)
+                os.path.join(root, filename)
             ).replace("\\", "/")
             json_path = os.path.normpath(
-                os.path.join(batch_dir, stem + ".json")
+                os.path.join(root, stem + ".json")
             ).replace("\\", "/")
+
+            try:
+                ts = int(os.path.getmtime(audio_path))
+            except Exception:
+                ts = 0
 
             metadata: dict = {}
             if os.path.exists(json_path):
@@ -117,11 +115,14 @@ def scan_library(sort_by: str = "date", min_rating: int = 0) -> list:
                 "metadata": metadata,
             })
 
+    # Apply sort
     if sort_by == "name":
         songs.sort(key=lambda s: s["stem"].lower())
     elif sort_by == "rating":
         songs.sort(key=lambda s: s["rating"], reverse=True)
-    # else "date" — already newest-first from the sorted batch_dirs loop
+    else:
+        # "date" — sort by actual mtime, newest first
+        songs.sort(key=lambda s: s["ts"], reverse=True)
 
     return songs
 
