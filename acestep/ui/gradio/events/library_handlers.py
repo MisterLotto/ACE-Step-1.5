@@ -74,15 +74,14 @@ def scan_library(sort_by: str = "date", min_rating: int = 0) -> list:
             if ext.lower() not in AUDIO_EXTENSIONS:
                 continue
 
-            audio_path = os.path.normpath(
-                os.path.join(root, filename)
-            ).replace("\\", "/")
+            native_path = os.path.join(root, filename)
+            audio_path = os.path.normpath(native_path).replace("\\", "/")
             json_path = os.path.normpath(
                 os.path.join(root, stem + ".json")
             ).replace("\\", "/")
 
             try:
-                ts = int(os.path.getmtime(audio_path))
+                ts = int(os.path.getmtime(native_path))
             except Exception:
                 ts = 0
 

@@ -401,7 +401,7 @@ GPU_TIER_CONFIGS = {
         "lm_backend_restriction": "all",
         "recommended_backend": "vllm",
         "offload_to_cpu_default": True,
-        "offload_dit_to_cpu_default": False,  # 12-16GB can keep DiT on GPU
+        "offload_dit_to_cpu_default": True,  # 12GB cards hit severe VRAM contention with DiT resident — LM tokens drop from ~22/s to ~1.5/s and VAE decode balloons from ~4min to ~30min
         "quantization_default": True,
         "compile_model_default": True,
         "lm_memory_gb": {"0.6B": 3, "1.7B": 8},
