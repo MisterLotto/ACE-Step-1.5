@@ -96,6 +96,7 @@ def build_lm_code_hint_controls() -> dict[str, Any]:
                 lines=6,
                 info=t("generation.lm_codes_info"),
                 elem_classes=["has-info-container"],
+                interactive=True,
                 scale=6,
             )
         with gr.Row():
