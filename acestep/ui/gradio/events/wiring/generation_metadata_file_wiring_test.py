@@ -54,6 +54,8 @@ _EXPECTED_METADATA_KEYS = [
     "complete_track_classes",
     "instrumental_checkbox",
     "song_name",
+    "retake_variance",
+    "retake_seed",
 ]
 
 def _tuple_string_values(node: ast.AST) -> list[str]:

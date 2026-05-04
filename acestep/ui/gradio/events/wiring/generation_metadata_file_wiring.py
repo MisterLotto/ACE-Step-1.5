@@ -122,6 +122,8 @@ _LOAD_METADATA_GENERATION_OUTPUT_KEYS = (
     "complete_track_classes",
     "instrumental_checkbox",
     "song_name",
+    "retake_variance",
+    "retake_seed",
 )
 
 

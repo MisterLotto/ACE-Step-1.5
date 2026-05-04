@@ -52,6 +52,14 @@ def generate_with_batch_management(
     latent_rescale,
     repaint_mode,
     repaint_strength,
+    retake_variance,
+    retake_seed,
+    flow_edit_morph,
+    flow_edit_source_caption,
+    flow_edit_source_lyrics,
+    flow_edit_n_min,
+    flow_edit_n_max,
+    flow_edit_n_avg,
     autogen_checkbox,
     current_batch_index,
     total_batches,
@@ -86,6 +94,9 @@ def generate_with_batch_management(
         enable_normalization, normalization_db, fade_in_duration, fade_out_duration,
         latent_shift, latent_rescale,
         repaint_mode, repaint_strength,
+        retake_variance, retake_seed,
+        flow_edit_morph, flow_edit_source_caption, flow_edit_source_lyrics,
+        flow_edit_n_min, flow_edit_n_max, flow_edit_n_avg,
         progress,
         song_name=song_name,
     )
@@ -161,6 +172,7 @@ def generate_with_batch_management(
         latent_shift, latent_rescale,
         repaint_mode=repaint_mode, repaint_strength=repaint_strength,
         song_name=song_name,
+        retake_variance=retake_variance, retake_seed=retake_seed,
     )
 
     next_params = saved_params.copy()
