@@ -2,6 +2,8 @@
 
 Contains functions for loading generation parameters from JSON files
 and sampling random examples from the examples directory.
+
+Project save/load is in :mod:`project_persistence`.
 """
 
 import os
@@ -15,6 +17,8 @@ from acestep.ui.gradio.i18n import t
 from acestep.gpu_config import get_global_gpu_config
 from acestep.inference import understand_music
 from .validation import clamp_duration_to_gpu_limit
+from acestep.ui.gradio.events.results.generation_info import DEFAULT_RESULTS_DIR
+from .project_persistence import save_project  # noqa: F401
 
 
 def load_metadata(file_obj, llm_handler=None):
@@ -26,7 +30,7 @@ def load_metadata(file_obj, llm_handler=None):
     """
     if file_obj is None:
         gr.Warning(t("messages.no_file_selected"))
-        return [None] * 42 + [False]
+        return [None] * 43 + [False]
 
     try:
         if hasattr(file_obj, 'name'):
@@ -116,6 +120,7 @@ def load_metadata(file_obj, llm_handler=None):
         if custom_timesteps is None:
             custom_timesteps = ''
         instrumental = metadata.get('instrumental', False)
+        song_name = metadata.get('song_name', '')
         try:
             retake_variance = float(metadata.get('retake_variance', 0.0) or 0.0)
         except (TypeError, ValueError):
@@ -141,17 +146,17 @@ def load_metadata(file_obj, llm_handler=None):
             lm_temperature, lm_cfg_scale, lm_top_k, lm_top_p, lm_negative_prompt,
             use_cot_metas, use_cot_caption, use_cot_language, audio_cover_strength,
             cover_noise_strength, think, audio_codes, repainting_start, repainting_end,
-            track_name, complete_track_classes, instrumental,
+            track_name, complete_track_classes, instrumental, song_name,
             retake_variance, retake_seed,
             True  # is_format_caption
         )
 
     except json.JSONDecodeError as e:
         gr.Warning(t("messages.invalid_json", error=str(e)))
-        return [None] * 42 + [False]
+        return [None] * 43 + [False]
     except Exception as e:
         gr.Warning(t("messages.load_error", error=str(e)))
-        return [None] * 42 + [False]
+        return [None] * 43 + [False]
 
 
 def _get_project_root() -> str:
