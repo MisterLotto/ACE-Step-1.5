@@ -267,6 +267,10 @@
     "all_files_label": "📁 すべての生成ファイル(ダウンロード)",
     "generation_details": "生成詳細"
   },
+  "library": {
+    "count_found_one": "**1** song found",
+    "count_found_many": "**{n}** songs found"
+  },
   "messages": {
     "no_audio_to_save": "❌ 保存するオーディオがありません",
     "save_success": "✅ オーディオとメタデータを {filename} に保存しました",

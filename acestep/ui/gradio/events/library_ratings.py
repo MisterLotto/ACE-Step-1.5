@@ -42,7 +42,7 @@ def save_ratings(ratings: dict) -> None:
         with os.fdopen(fd, "w", encoding="utf-8") as f:
             json.dump(ratings, f, indent=2, ensure_ascii=False)
         os.replace(tmp_path, RATINGS_FILE)
-    except Exception:
+    except OSError:
         try:
             os.unlink(tmp_path)
         except OSError:

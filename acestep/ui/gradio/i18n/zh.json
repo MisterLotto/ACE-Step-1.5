@@ -278,6 +278,10 @@
     "all_files_label": "📁 所有生成的文件(下载)",
     "generation_details": "生成详情"
   },
+  "library": {
+    "count_found_one": "**1** song found",
+    "count_found_many": "**{n}** songs found"
+  },
   "messages": {
     "no_audio_to_save": "❌ 没有要保存的音频",
     "save_success": "✅ 已将音频和元数据保存到 {filename}",

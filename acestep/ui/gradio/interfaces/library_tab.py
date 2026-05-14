@@ -11,7 +11,7 @@ from acestep.ui.gradio.interfaces.library_tab_handlers import (
     select_song,
 )
 
-_SORT_CHOICES = [("Newest First", "date"), ("Name A–Z", "name"), ("Top Rated", "rating")]
+_SORT_CHOICES = [("Newest First", "date"), ("Name A-Z", "name"), ("Top Rated", "rating")]
 _FILTER_CHOICES = [
     ("All", 0), ("★+", 1), ("★★+", 2), ("★★★+", 3), ("★★★★+", 4), ("★★★★★", 5)
 ]

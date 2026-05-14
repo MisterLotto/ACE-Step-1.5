@@ -308,6 +308,10 @@
     "all_files_label": "📁 All Generated Files (Download)",
     "generation_details": "Generation Details"
   },
+  "library": {
+    "count_found_one": "**1** song found",
+    "count_found_many": "**{n}** songs found"
+  },
   "messages": {
     "no_audio_to_save": "❌ No audio to save",
     "save_success": "✅ Saved audio and metadata to {filename}",

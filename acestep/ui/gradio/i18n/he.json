@@ -283,6 +283,10 @@
     "all_files_label": "📁 כל הקבצים שנוצרו (הורדה)",
     "generation_details": "פרטי יצירה"
   },
+  "library": {
+    "count_found_one": "**1** song found",
+    "count_found_many": "**{n}** songs found"
+  },
   "messages": {
     "no_audio_to_save": "❌ אין אודיו לשמירה",
     "save_success": "✅ אודיו ומטא-דאטה נשמרו ב-{filename}",

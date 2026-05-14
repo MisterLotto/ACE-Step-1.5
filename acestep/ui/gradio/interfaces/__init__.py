@@ -372,7 +372,7 @@ def create_gradio_interface(dit_handler, llm_handler, dataset_handler, init_para
             songs = scan_library()
             rows = get_library_rows(songs)
             n = len(songs)
-            return rows, songs, f"**{n}** song{'s' if n != 1 else ''} found"
+            return rows, songs, t("library.count_found_one") if n == 1 else t("library.count_found_many", n=n)
 
         demo.load(
             fn=_lib_initial_load,

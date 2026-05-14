@@ -7,6 +7,7 @@ receive their inputs as plain values and return tuples of values/
 
 import gradio as gr
 
+from acestep.ui.gradio.i18n import t
 from acestep.ui.gradio.events.library_handlers import (
     delete_song,
     get_library_rows,
@@ -24,7 +25,7 @@ def do_refresh(sort_by, min_rating):
         gr.Warning(f"Library scan failed: {e}")
         return gr.update(), gr.update(), "⚠️ Scan failed"
     n = len(songs)
-    count_md = f"**{n}** song{'s' if n != 1 else ''} found"
+    count_md = t("library.count_found_one") if n == 1 else t("library.count_found_many", n=n)
     return rows, songs, count_md
 
 
@@ -89,7 +90,7 @@ def save_rating(audio_path, rating_val, songs, sort_by, min_rating):
     songs_refreshed = scan_library(sort_by=sort_by, min_rating=int(min_rating or 0))
     rows = get_library_rows(songs_refreshed)
     n = len(songs_refreshed)
-    count_md = f"**{n}** song{'s' if n != 1 else ''} found"
+    count_md = t("library.count_found_one") if n == 1 else t("library.count_found_many", n=n)
     return rows, songs_refreshed, count_md, status
 
 
@@ -106,7 +107,7 @@ def delete(audio_path, sort_by, min_rating):
     songs_refreshed = scan_library(sort_by=sort_by, min_rating=int(min_rating or 0))
     rows = get_library_rows(songs_refreshed)
     n = len(songs_refreshed)
-    count_md = f"**{n}** song{'s' if n != 1 else ''} found"
+    count_md = t("library.count_found_one") if n == 1 else t("library.count_found_many", n=n)
     if _ok:
         return (
             rows,

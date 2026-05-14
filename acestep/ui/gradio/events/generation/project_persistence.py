@@ -199,7 +199,7 @@ def _save_project_impl(
 
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     base = (song_name or "").strip()
-    safe = "".join(c if c.isalnum() or c in "-_ " else "_" for c in base)[:80].strip("_. ")
+    safe = "".join(c if c.isalnum() or c in "-_" else "_" for c in base)[:80].strip("_.")
     safe = safe or "project"
     filename = f"{safe}_{timestamp}.json"
 

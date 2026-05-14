@@ -112,7 +112,7 @@ class SaveProjectImplTests(unittest.TestCase):
     def test_song_name_in_filename_and_json(self):
         result = _call(self._tmp, song_name="My Song")
         fname = os.path.basename(result["value"])
-        self.assertTrue(fname.startswith("My Song"))
+        self.assertTrue(fname.startswith("My_Song"))
         self.assertEqual(_read_saved(result)["song_name"], "My Song")
 
     def test_blank_song_name_uses_project_prefix(self):

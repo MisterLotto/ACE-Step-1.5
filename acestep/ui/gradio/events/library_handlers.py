@@ -1,5 +1,6 @@
 """Library tab backend: scan, rate, and delete generated songs."""
 
+import json
 import os
 from datetime import datetime
 
@@ -46,8 +47,6 @@ def scan_library(sort_by: str = "date", min_rating: int = 0) -> list:
         List of song dicts, each with keys:
             path, stem, date_str, ts, bpm, caption, rating, metadata.
     """
-    import json
-
     if not os.path.exists(DEFAULT_RESULTS_DIR):
         return []
 
