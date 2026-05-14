@@ -284,8 +284,8 @@
     "generation_details": "פרטי יצירה"
   },
   "library": {
-    "count_found_one": "**1** song found",
-    "count_found_many": "**{n}** songs found"
+    "count_found_one": "**1** שיר נמצא",
+    "count_found_many": "**{n}** שירים נמצאו"
   },
   "messages": {
     "no_audio_to_save": "❌ אין אודיו לשמירה",

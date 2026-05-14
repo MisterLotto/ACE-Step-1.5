@@ -268,8 +268,8 @@
     "generation_details": "生成詳細"
   },
   "library": {
-    "count_found_one": "**1** song found",
-    "count_found_many": "**{n}** songs found"
+    "count_found_one": "**1** 曲見つかりました",
+    "count_found_many": "**{n}** 曲見つかりました"
   },
   "messages": {
     "no_audio_to_save": "❌ 保存するオーディオがありません",

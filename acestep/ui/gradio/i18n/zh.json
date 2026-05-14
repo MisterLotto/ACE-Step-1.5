@@ -279,8 +279,8 @@
     "generation_details": "生成详情"
   },
   "library": {
-    "count_found_one": "**1** song found",
-    "count_found_many": "**{n}** songs found"
+    "count_found_one": "**1** 首歌曲已找到",
+    "count_found_many": "**{n}** 首歌曲已找到"
   },
   "messages": {
     "no_audio_to_save": "❌ 没有要保存的音频",
